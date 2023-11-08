@@ -2,9 +2,13 @@ import axios from "axios";
 import { useMutation } from "react-query";
 
 const login = async (variable) => {
-    const { data } = await axios.post("/admin/login/sign-in", variable);
-    console.log("Login Data: ", data);
-    return data;
+	try {
+		const { data } = await axios.post("/admin/login/sign-in", variable);
+		return data;
+	} catch (error) {
+		window.alert(error.response.data.message);
+		window.location.reload();
+	}
 };
 
 const useLogin = () => useMutation(login);

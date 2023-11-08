@@ -1,0 +1,563 @@
+import React, { useState, useEffect } from "react";
+import { useRecoilState } from "recoil";
+import { useNavigate } from "react-router-dom";
+import {
+	Container,
+	Wrap,
+	FormInput,
+	FormLabel,
+	FormRowWrap,
+} from "../../components/style";
+import Sidebar from "../../components/Sidebar";
+import {
+	Badge,
+	Button,
+	Form,
+	Image,
+	Input,
+	Layout,
+	Modal,
+	Radio,
+	Select,
+	Table,
+} from "antd";
+import usePipelineList from "../../api/pipeline/usePipelineList";
+import {
+	MinusCircleOutlined,
+	MinusOutlined,
+	PlusOutlined,
+} from "@ant-design/icons";
+import useCareerList from "../../api/career/useCareerList";
+
+const Career = () => {
+	const { TextArea } = Input;
+	const navigate = useNavigate();
+	const [form] = Form.useForm();
+	const [page, setPage] = useState(1);
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [modalInfo, setModalInfo] = useState({});
+	const [modalFor, setModalFor] = useState("");
+	const [selectedFile, setSelectedFile] = useState(null);
+	const [indication, setIndication] = useState([{ indication: "", phase: "" }]);
+	const [len, setLen] = useState(1);
+	const phaseList = [
+		"IND-enabling",
+		"Phase 1",
+		"Phase 2",
+		"Phase 3",
+		"Approval",
+	];
+
+	const { data, isLoading, refetch } = useCareerList();
+	// const { mutate, isSuccess } = useAddPipeline();
+	// const { mutate: mutateEdit } = useEditPipeline();
+	// const { mutate: mutateDelete } = useDeletePipeline();
+
+	const listColumns = [
+		{
+			title: "ID",
+			dataIndex: "id",
+			key: "idd",
+		},
+		{
+			title: "Locaation",
+			dataIndex: "location",
+			key: "location",
+		},
+		{
+			title: "Date",
+			dataIndex: "year",
+			key: "year",
+			render: (_, record) => (
+				<span>
+					{record.year}-{record.monthNumber}-{record.day}
+				</span>
+			),
+		},
+		{
+			title: "Job Title",
+			dataIndex: "jobTitle",
+			key: "jobTitle",
+			render: (_, record) => (
+				<span>
+					{record.jobGroupDto.name.slice(0, 30)}
+					{record.jobGroupDto.name.length > 30 && "..."}
+				</span>
+			),
+		},
+		{
+			title: "Image",
+			dataIndex: "fileDtoList",
+			key: "fileDtoList",
+			render: (arr) =>
+				arr?.map((item) => (
+					<span key={"career file" + item.fileId}>{item.fileName}</span>
+				)),
+		},
+		{
+			title: "Link",
+			dataIndex: "url",
+			key: "url",
+			render: (text) => (
+				<span>
+					{text?.slice(0, 30)}
+					{text?.length > 30 && "..."}
+				</span>
+			),
+		},
+
+		{
+			title: "",
+			key: "action",
+			render: (event, record) => (
+				<div
+					style={{
+						width: "100%",
+						display: "flex",
+						flexDirection: "row",
+						justifyContent: "space-evenly",
+					}}
+				>
+					<Button
+						style={{ marginRight: "10px" }}
+						onClick={async (event) => {
+							setModalFor("edit");
+							event.stopPropagation();
+							setSelectedFile();
+							let editData = {
+								id: record.id,
+								drugCandidate: record.drugCandidate,
+								modality: record.modality,
+								target: record.target,
+								popUpTitle: record.popUpTitle,
+								popUpContents: record.popUpContents,
+								indication: record.pipelineIndicationDtoList.map((item) => ({
+									indication: item.indication,
+									phase: item.phase,
+								})),
+							};
+							setIndication(editData.indication);
+							await setModalInfo(editData);
+							form.setFieldsValue(editData);
+							setTimeout(() => {
+								setIsModalOpen(true);
+							}, 100);
+						}}
+					>
+						Edit
+					</Button>
+					<Button
+						danger
+						onClick={(event) => {
+							event.stopPropagation();
+
+							Modal.confirm({
+								title: "Are you sure to delete this user?",
+
+								onOk() {
+									// handleDelete(record.id);
+								},
+								onCancel() {
+									handleCancel();
+								},
+								okText: "Delete",
+								cancelText: "Cancel",
+							});
+						}}
+					>
+						Delete
+					</Button>
+				</div>
+			),
+		},
+	];
+
+	const formItemLayout = {
+		labelCol: {
+			xs: { span: 4 },
+			sm: { span: 4 },
+		},
+		wrapperCol: {
+			xs: { span: 24 },
+			sm: { span: 24 },
+		},
+	};
+
+	useEffect(() => {
+		if (!window.localStorage.getItem("token")) {
+			navigate("/login");
+			// navigate("/history");
+		}
+
+		if (data?.data.success) {
+			// console.log(data.data);
+		}
+	}, [data]);
+
+	// const handleAdd = async () => {
+	// 	await form.validateFields().then(async (values) => {
+	// 		const { drugCandidate, modality, popUpContents, popUpTitle, target } =
+	// 			await values;
+	// 		try {
+	// 			mutate({
+	// 				drugCandidate,
+	// 				modality,
+	// 				popUpContents,
+	// 				popUpTitle,
+	// 				target,
+	// 				createPipelineIndicationDtoList: indication,
+	// 			});
+	// 		} catch (error) {
+	// 			console.log(error);
+	// 		} finally {
+	// 			// await refetch();
+	// 			handleCancel();
+	// 			// window.location.reload();
+	// 		}
+	// 	});
+	// };
+	// const handleEdit = async (id) => {
+	// 	await form.validateFields().then(async (values) => {
+	// 		const { drugCandidate, modality, popUpContents, popUpTitle, target } =
+	// 			await values;
+
+	// 		const edit = {
+	// 			drugCandidate,
+	// 			modality,
+	// 			popUpContents,
+	// 			popUpTitle,
+	// 			target,
+	// 		};
+	// 		edit.createPipelineIndicationDtoList = indication;
+
+	// 		try {
+	// 			mutateEdit({ id, edit });
+	// 		} catch (error) {
+	// 			console.log(error);
+	// 		} finally {
+	// 			handleCancel();
+	// 		}
+	// 	});
+	// };
+
+	// const handleDelete = async (id) => {
+	// 	try {
+	// 		mutateDelete(id);
+	// 	} catch (error) {
+	// 		console.log(error);
+	// 	} finally {
+	// 		// await refetch();
+	// 		handleCancel();
+	// 		// window.location.reload();
+	// 	}
+	// };
+
+	const handleCancel = () => {
+		form.resetFields();
+		setModalInfo({});
+		setIsModalOpen(false);
+		setSelectedFile();
+		setModalFor("");
+		setIndication([{ indication: "", phase: "" }]);
+	};
+
+	const handleDynamicChange = (e, index, key) => {
+		let temp = [...indication];
+		if (key === "phase") {
+			temp[index][key] = e;
+		} else {
+			temp[index][key] = e.target.value;
+		}
+
+		setIndication(temp);
+	};
+
+	return (
+		<Layout
+			style={{
+				width: "100vw",
+				minHeight: "100vh",
+				display: "grid",
+				gridTemplateColumns: "200px 1fr",
+			}}
+		>
+			<Sidebar page='adminusers' />
+			<Wrap>
+				<div
+					style={{
+						display: "flex",
+						flexDirection: "column",
+						alignItems: "start",
+						width: "100%",
+						height: "fit-content",
+						padding: "0",
+					}}
+				>
+					<h1>Career</h1>
+					<div
+						style={{
+							marginTop: "50px",
+							width: "100%",
+						}}
+					>
+						<Button
+							type='primary'
+							onClick={() => {
+								setModalFor("add");
+								setModalInfo({});
+								setIsModalOpen(true);
+								setSelectedFile();
+							}}
+						>
+							Add Data
+						</Button>
+					</div>
+					<Table
+						dataSource={data?.data?.dataList}
+						columns={listColumns}
+						loading={isLoading}
+						style={{ marginTop: "20px", width: "100%" }}
+						rowKey={(record) => record.id}
+					/>
+				</div>
+			</Wrap>
+			<Modal
+				width={800}
+				style={{ overflowY: "scroll" }}
+				title={modalFor === "add" ? "Add New Pipeline" : "Edit Pipeline"}
+				open={isModalOpen}
+				// confirmLoading={confirmLoading}
+
+				onCancel={handleCancel}
+				footer={null}
+			>
+				<Form
+					{...formItemLayout}
+					form={form}
+					name={modalFor === "add" ? "addpipeline" : "editpipeline"}
+					autoComplete='off'
+				>
+					{modalFor === "add" ? (
+						<>
+							<Form.Item
+								label='Drugcandidate'
+								name='drugCandidate'
+								style={{ marginTop: "30px" }}
+							>
+								<Input style={{ width: "130px" }} />
+							</Form.Item>
+							<Form.Item label='Modality' name='modality'>
+								<Input />
+							</Form.Item>
+							<Form.Item label='Target' name='target'>
+								<Input />
+							</Form.Item>
+
+							<Form.Item label='Pop-Up Title' name='popUpTitle'>
+								<Input />
+							</Form.Item>
+							<Form.Item label='Pop-Up Contents' name='popUpContents'>
+								<TextArea rows={4} />
+							</Form.Item>
+							<Form.Item label='Indication/Phase'></Form.Item>
+							<div>
+								{indication?.map((item, index) => (
+									<FormRowWrap key={"indication input" + index}>
+										<FormLabel htmlFor={"indication" + index}>
+											Indication:
+										</FormLabel>
+										<FormInput
+											id={"indication" + index}
+											value={indication[index].indication}
+											onChange={(e) => {
+												handleDynamicChange(e, index, "indication");
+											}}
+										/>
+										<FormLabel htmlFor={"phase" + index}>Phase:</FormLabel>
+										{/* <FormInput
+											id={"phase" + index}
+											name={"phase" + index}
+											value={indication[index].phase}
+											onChange={(e) => {
+												handleDynamicChange(e, index, "phase");
+											}}
+										/> */}
+										<Select
+											defaultValue='0'
+											style={{ width: 300 }}
+											onChange={(value) =>
+												handleDynamicChange(value, index, "phase")
+											}
+											options={[
+												{ value: "0", label: "IND-Enabled" },
+												{ value: "1", label: "Phase 1" },
+												{ value: "2", label: "Phase 2" },
+												{ value: "3", label: "Phase 3" },
+												{ value: "4", label: "Approval" },
+											]}
+										/>
+									</FormRowWrap>
+								))}
+								<FormRowWrap>
+									<Button
+										type='dashed'
+										onClick={() => {
+											setIndication([
+												...indication,
+												{ indication: "", phase: "" },
+											]);
+										}}
+										style={{ width: "fit-content", margin: "10px 0 10px 30px" }}
+										icon={<PlusOutlined />}
+									>
+										Add
+									</Button>
+									<Button
+										type='dashed'
+										onClick={() => {
+											setIndication(indication.slice(0, -1));
+										}}
+										style={{ width: "fit-content", margin: "10px 0 10px 30px" }}
+										icon={<MinusOutlined />}
+									>
+										Remove
+									</Button>
+								</FormRowWrap>
+							</div>
+
+							<p
+								style={{
+									display: "flex",
+									flexDirection: "row",
+									gap: "10px",
+									justifyContent: "end",
+									alignItems: "center",
+								}}
+							>
+								<Button
+									type='primary'
+									onClick={(event) => {
+										event.stopPropagation();
+
+										// handleAdd();
+									}}
+								>
+									Confirm
+								</Button>
+								<Button onClick={handleCancel}>Cancel</Button>
+							</p>
+						</>
+					) : (
+						<>
+							<Form.Item label='ID' name='id' style={{ marginTop: "30px" }}>
+								{modalInfo.id}
+							</Form.Item>
+							<Form.Item
+								label='Drugcandidate'
+								name='drugCandidate'
+								style={{ marginTop: "30px" }}
+							>
+								<Input style={{ width: "130px" }} />
+							</Form.Item>
+							<Form.Item label='Modality' name='modality'>
+								<Input />
+							</Form.Item>
+							<Form.Item label='Target' name='target'>
+								<Input />
+							</Form.Item>
+
+							<Form.Item label='Pop-Up Title' name='popUpTitle'>
+								<Input />
+							</Form.Item>
+							<Form.Item label='Pop-Up Contents' name='popUpContents'>
+								<TextArea rows={4} />
+							</Form.Item>
+							<Form.Item label='Indication/Phase'></Form.Item>
+							<div>
+								{indication?.map((item, index) => (
+									<FormRowWrap key={"indication input" + index}>
+										<FormLabel htmlFor={"indication" + index}>
+											Indication:
+										</FormLabel>
+										<FormInput
+											id={"indication" + index}
+											value={indication[index].indication}
+											onChange={(e) => {
+												handleDynamicChange(e, index, "indication");
+											}}
+										/>
+										<FormLabel htmlFor={"phase" + index}>Phase:</FormLabel>
+
+										<Select
+											value={indication[index].phase.toString()}
+											style={{ width: 300 }}
+											onChange={(value) =>
+												handleDynamicChange(value, index, "phase")
+											}
+											options={[
+												{ value: "0", label: "IND-Enabled" },
+												{ value: "1", label: "Phase 1" },
+												{ value: "2", label: "Phase 2" },
+												{ value: "3", label: "Phase 3" },
+												{ value: "4", label: "Approval" },
+											]}
+										/>
+									</FormRowWrap>
+								))}
+								<FormRowWrap>
+									<Button
+										type='dashed'
+										onClick={() => {
+											setIndication([
+												...indication,
+												{ indication: "", phase: "" },
+											]);
+										}}
+										style={{ width: "fit-content", margin: "10px 0 10px 30px" }}
+										icon={<PlusOutlined />}
+									>
+										Add
+									</Button>
+									<Button
+										type='dashed'
+										onClick={() => {
+											setIndication(indication.slice(0, -1));
+										}}
+										style={{ width: "fit-content", margin: "10px 0 10px 30px" }}
+										icon={<MinusOutlined />}
+									>
+										Remove
+									</Button>
+								</FormRowWrap>
+							</div>
+
+							<p
+								style={{
+									display: "flex",
+									flexDirection: "row",
+									gap: "10px",
+									justifyContent: "end",
+									alignItems: "center",
+								}}
+							>
+								<Button
+									disabled={false}
+									type='primary'
+									onClick={(event) => {
+										event.stopPropagation();
+										// handleEdit(modalInfo.id);
+									}}
+								>
+									Edit
+								</Button>
+								<Button onClick={handleCancel}>Cancel</Button>
+							</p>
+						</>
+					)}
+				</Form>
+			</Modal>
+		</Layout>
+	);
+};
+
+export default Career;

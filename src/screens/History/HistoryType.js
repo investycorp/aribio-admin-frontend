@@ -3,17 +3,13 @@ import AdminInfo from "../../atoms/AdminInfo";
 import { useRecoilState } from "recoil";
 import { useNavigate } from "react-router-dom";
 import { Container, Wrap } from "../../components/style";
-import Sidebar from "../../components/Sidebar";
-import { Button, Form, Input, Layout, Modal, Radio, Table } from "antd";
-import useHistoryList from "../../api/history/useHistoryList";
-import useAddHistory from "../../api/history/useAddHistory ";
+import { Button, Form, Input, Layout, Modal, Table } from "antd";
 import useHistoryTypeList from "../../api/history/useHistoryTypeList ";
-import HistoryType from "./HistoryType";
-import useEditHistory from "../../api/history/useEditHistory ";
-import useDeleteHistory from "../../api/history/useDeleteHistory";
+import useAddHistoryType from "../../api/history/useAddHistoryType";
+import useDeleteHistoryType from "../../api/history/useDeleteHistoryType";
+import useEditHistoryType from "../../api/history/useEditHistoryType";
 
-const History = () => {
-	const { Search } = Input;
+const HistoryType = () => {
 	const navigate = useNavigate();
 	const [form] = Form.useForm();
 	const [adminInfo, setAdminInfo] = useRecoilState(AdminInfo);
@@ -21,19 +17,18 @@ const History = () => {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [modalInfo, setModalInfo] = useState({});
 	const [modalFor, setModalFor] = useState("");
-	const [filteredList, setFilteredList] = useState([]);
-	const [searchValue, setSearchValue] = useState("");
-	const { data, isLoading, isError, error } = useHistoryList();
+
 	const {
 		data: typeData,
 		isLoading: typeIsLoading,
 		isError: typeIsError,
 		error: typeError,
 	} = useHistoryTypeList();
-	const { mutate, isSuccess } = useAddHistory();
-	const { mutate: mutateEdit, isSuccess: isSuccessEdit } = useEditHistory();
-	const { mutate: mutateDelete, isSuccess: isSuccessDelete } =
-		useDeleteHistory();
+
+	const { mutate } = useAddHistoryType();
+	const { mutate: mutateEdit } = useEditHistoryType();
+	const { mutate: mutateDelete } = useDeleteHistoryType();
+
 	const listColumns = [
 		{
 			title: "ID",
@@ -41,41 +36,24 @@ const History = () => {
 			key: "id",
 		},
 		{
-			title: "Date",
-			dataIndex: "year",
-			key: "year",
-			sorter: (a, b) => a.year - b.year,
-			// filter: [
-			// 	{
-			// 		text: "2023",
-			// 		value: "2023",
-			// 	}
-			// ],
-			render: (_, record) => (
-				<span>
-					{record?.year}.{record?.month}.{record?.day}
-				</span>
-			),
-		},
-
-		{
-			title: "Category",
-			dataIndex: "historyTypeId",
-			key: "historyTypeId",
-			render: (id) => {
-				let type;
-				typeData?.data?.dataList.map((item) => {
-					if (item?.id === id) {
-						type = ` ${item?.startYear} ~ ${item?.endYear}`;
-					}
-				});
-				return type;
-			},
+			title: "Start Year",
+			dataIndex: "startYear",
+			key: "startYear",
 		},
 		{
-			title: "Contents",
-			dataIndex: "contents",
-			key: "contents",
+			title: "End Year",
+			dataIndex: "endYear",
+			key: "endYear",
+		},
+		{
+			title: "Title",
+			dataIndex: "title",
+			key: "title",
+		},
+		{
+			title: "Subtitle",
+			dataIndex: "subtitle",
+			key: "subtitle",
 			render: (text) => (
 				<span>
 					{text?.slice(0, 45)}
@@ -102,11 +80,10 @@ const History = () => {
 							event.stopPropagation();
 							let editData = {
 								id: record.id,
-								year: record.year,
-								month: record.month,
-								day: record.day,
-								historyTypeId: record.historyTypeId,
-								contents: record.contents,
+								startYear: record.startYear,
+								endYear: record.endYear,
+								title: record.title,
+								subtitle: record.subtitle,
 							};
 							await setModalInfo(editData);
 							form.setFieldsValue(editData);
@@ -158,25 +135,15 @@ const History = () => {
 			navigate("/login");
 		}
 
-		if (data?.data.success) {
-			// console.log(data.data);
-			setFilteredList(data?.data?.dataList);
-		}
 		if (typeData?.data.success) {
 		}
-	}, [data]);
+	}, [typeData]);
 
 	const handleAdd = async () => {
 		await form.validateFields().then(async (values) => {
-			const { year, month, day, contents, historyTypeId } = await values;
+			const { startYear, endYear, title, subtitle } = await values;
 			try {
-				mutate({
-					year,
-					month,
-					day,
-					contents,
-					historyTypeId,
-				});
+				mutate({ startYear, endYear, title, subtitle });
 			} catch (error) {
 				console.log(error);
 			} finally {
@@ -189,17 +156,10 @@ const History = () => {
 
 	const handleEdit = async (id) => {
 		await form.validateFields().then(async (values) => {
-			const { year, month, day, contents, historyTypeId } = await values;
-			const edit = await {
-				year,
-				month,
-				day,
-				contents,
-				historyTypeId,
-			};
+			const { startYear, endYear, title, subtitle } = await values;
+			const edit = { startYear, endYear, title, subtitle };
 
 			try {
-				console.log("edit: ", edit);
 				mutateEdit({ id, edit });
 			} catch (error) {
 				console.log(error);
@@ -228,72 +188,45 @@ const History = () => {
 		setModalFor("");
 	};
 
-	const onSearch = (value) => {
-		setSearchValue(value);
-		let filteredData = data?.data?.dataList.filter((item) => {
-			return (
-				item.contents.toLowerCase().includes(value.toLowerCase()) ||
-				item.year.toString().includes(value)
-			);
-		});
-		setFilteredList(filteredData);
-	};
-
 	return (
-		<Layout
-			style={{
-				width: "100vw",
-				height: "100vh",
-				display: "grid",
-				gridTemplateColumns: "200px 1fr",
-				overflow: "hidden",
-			}}
-		>
-			<Sidebar page='history' />
-			<Wrap style={{ width: "100%" }}>
-				<h1 style={{ width: "100%", textAlign: "start" }}>History</h1>
-				<HistoryType />
-
-				<div
-					style={{
-						width: "100%",
-					}}
-				>
-					<h2 style={{ width: "100%", textAlign: "start", margin: "20px 0" }}>
-						History Contents
+		<>
+			<div
+				style={{
+					width: "100%",
+					height: "fit-content",
+					justifyContent: "start",
+					alignItems: "start",
+					marginTop: "50px",
+				}}
+			>
+				<div>
+					<h2
+						style={{ width: "100%", textAlign: "start", margin: "0 0 20px 0" }}
+					>
+						History Category
 					</h2>
-					<div>
-						<Button
-							type='primary'
-							onClick={() => {
-								setModalFor("add");
-								setModalInfo({});
-								setIsModalOpen(true);
-							}}
-						>
-							Add Data
-						</Button>
-					</div>
-					<div style={{ margin: "20px 0", width: "300px" }}>
-						<Search
-							placeholder='input search text'
-							allowClear
-							enterButton='Search'
-							size='large'
-							onSearch={onSearch}
-						/>
-					</div>
-					<Table
-						dataSource={filteredList}
-						columns={listColumns}
-						loading={isLoading}
-						style={{ marginTop: "20px", width: "100%" }}
-						rowKey={(record) => record.id}
-					/>
+					<Button
+						type='primary'
+						onClick={() => {
+							setModalFor("add");
+							setModalInfo({});
+							setIsModalOpen(true);
+						}}
+					>
+						Add Category
+					</Button>
 				</div>
-			</Wrap>
+				<Table
+					dataSource={typeData?.data?.dataList}
+					columns={listColumns}
+					loading={typeIsLoading}
+					style={{ marginTop: "20px", width: "fit-content" }}
+					rowKey={(record) => record.id}
+				/>
+			</div>
+
 			<Modal
-				title={modalFor === "add" ? "Add New Admin" : "Edit Admin User"}
+				title={modalFor === "add" ? "Add New Category" : "Edit Category"}
 				open={isModalOpen}
 				// confirmLoading={confirmLoading}
 				width={700}
@@ -309,8 +242,8 @@ const History = () => {
 					{modalFor === "add" ? (
 						<>
 							<Form.Item
-								label='Year'
-								name='year'
+								label='Start Year'
+								name='startYear'
 								rules={[
 									{
 										required: true,
@@ -321,8 +254,8 @@ const History = () => {
 								<Input autoFocus style={{ width: "70px" }} />
 							</Form.Item>
 							<Form.Item
-								label='Month'
-								name='month'
+								label='End Year'
+								name='endYear'
 								rules={[
 									{
 										required: true,
@@ -333,8 +266,8 @@ const History = () => {
 								<Input style={{ width: "70px" }} />
 							</Form.Item>
 							<Form.Item
-								label='Date'
-								name='day'
+								label='Title'
+								name='title'
 								rules={[
 									{
 										required: true,
@@ -342,11 +275,11 @@ const History = () => {
 									},
 								]}
 							>
-								<Input style={{ width: "70px" }} />
+								<Input style={{ width: "100%" }} />
 							</Form.Item>
 							<Form.Item
-								label='Category'
-								name='historyTypeId'
+								label='Subtitle'
+								name='subtitle'
 								rules={[
 									{
 										required: true,
@@ -354,34 +287,8 @@ const History = () => {
 									},
 								]}
 							>
-								<Radio.Group
-									initialValue={modalInfo?.historyTypeId}
-									buttonStyle='solid'
-								>
-									{typeData?.data?.dataList.map((item) => {
-										if (item.id) {
-											return (
-												<Radio.Button key={item.id} value={item.id}>
-													{item.startYear} ~ {item.endYear}
-												</Radio.Button>
-											);
-										}
-									})}
-								</Radio.Group>
+								<Input style={{ width: "100%" }} />
 							</Form.Item>
-							<Form.Item
-								label='Contents'
-								name='contents'
-								rules={[
-									{
-										required: true,
-										message: "Required field",
-									},
-								]}
-							>
-								<Input />
-							</Form.Item>
-
 							<p
 								style={{
 									display: "flex",
@@ -409,8 +316,8 @@ const History = () => {
 								{modalInfo.id}
 							</Form.Item>
 							<Form.Item
-								label='Year'
-								name='year'
+								label='Start Year'
+								name='startYear'
 								rules={[
 									{
 										required: true,
@@ -421,8 +328,8 @@ const History = () => {
 								<Input autoFocus style={{ width: "70px" }} />
 							</Form.Item>
 							<Form.Item
-								label='Month'
-								name='month'
+								label='End Year'
+								name='endYear'
 								rules={[
 									{
 										required: true,
@@ -433,8 +340,8 @@ const History = () => {
 								<Input style={{ width: "70px" }} />
 							</Form.Item>
 							<Form.Item
-								label='Date'
-								name='day'
+								label='Title'
+								name='title'
 								rules={[
 									{
 										required: true,
@@ -442,11 +349,11 @@ const History = () => {
 									},
 								]}
 							>
-								<Input style={{ width: "70px" }} />
+								<Input style={{ width: "100%" }} />
 							</Form.Item>
 							<Form.Item
-								label='Category'
-								name='historyTypeId'
+								label='Subtitle'
+								name='subtitle'
 								rules={[
 									{
 										required: true,
@@ -454,34 +361,7 @@ const History = () => {
 									},
 								]}
 							>
-								{/* <Input style={{ width: "70px" }} /> */}
-								<Radio.Group
-									initialValue={modalInfo?.historyTypeId}
-									buttonStyle='solid'
-								>
-									{typeData?.data?.dataList.map((item) => {
-										if (item.id) {
-											return (
-												<Radio.Button key={item.id} value={item.id}>
-													{item.startYear} ~ {item.endYear}
-												</Radio.Button>
-											);
-										}
-									})}
-								</Radio.Group>
-							</Form.Item>
-							<Form.Item
-								layout='vertical'
-								label='Contents'
-								name='contents'
-								rules={[
-									{
-										required: true,
-										message: "Required field",
-									},
-								]}
-							>
-								<Input />
+								<Input style={{ width: "100%" }} />
 							</Form.Item>
 
 							<p
@@ -509,8 +389,8 @@ const History = () => {
 					)}
 				</Form>
 			</Modal>
-		</Layout>
+		</>
 	);
 };
 
-export default History;
+export default HistoryType;

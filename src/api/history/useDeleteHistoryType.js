@@ -1,19 +1,19 @@
 import axios from "axios";
 import { useMutation, useQueryClient } from "react-query";
 
-const useDeleteAdmin = () => {
+const useDeleteHistoryType = () => {
 	const queryClient = useQueryClient();
 
-	const deleteAdminData = async (id) => {
-		const { data } = await axios.delete(`/super/${id}`);
+	const deleteHistoryTypeData = async (id) => {
+		const { data } = await axios.delete(`/admin/history/type/${id}`);
 		return data;
 	};
 
 	const { mutate, data, isSuccess, isError, isLoading } = useMutation(
-		deleteAdminData,
+		deleteHistoryTypeData,
 		{
 			onSuccess: () => {
-				queryClient.invalidateQueries("AdminUserList");
+				queryClient.invalidateQueries("historyTypeList");
 				console.log("success:", data);
 			},
 		}
@@ -22,4 +22,4 @@ const useDeleteAdmin = () => {
 	return { mutate, data, isSuccess, isError, isLoading };
 };
 
-export default useDeleteAdmin;
+export default useDeleteHistoryType;

@@ -1,19 +1,21 @@
 import axios from "axios";
 import { useMutation, useQueryClient } from "react-query";
 
-const useDeleteAdmin = () => {
+const useEditHistoryType = () => {
+	const lan = "ENGLISH";
 	const queryClient = useQueryClient();
 
-	const deleteAdminData = async (id) => {
-		const { data } = await axios.delete(`/super/${id}`);
+	const editHistoryTypeData = async ({ id, edit }) => {
+		edit.language = lan;
+		const { data } = await axios.put(`/admin/history/type/${id}`, edit);
 		return data;
 	};
 
 	const { mutate, data, isSuccess, isError, isLoading } = useMutation(
-		deleteAdminData,
+		editHistoryTypeData,
 		{
 			onSuccess: () => {
-				queryClient.invalidateQueries("AdminUserList");
+				queryClient.invalidateQueries("historyTypeList");
 				console.log("success:", data);
 			},
 		}
@@ -22,4 +24,4 @@ const useDeleteAdmin = () => {
 	return { mutate, data, isSuccess, isError, isLoading };
 };
 
-export default useDeleteAdmin;
+export default useEditHistoryType;

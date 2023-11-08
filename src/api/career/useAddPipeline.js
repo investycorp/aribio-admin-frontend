@@ -1,19 +1,22 @@
 import axios from "axios";
 import { useMutation, useQueryClient } from "react-query";
 
-const useDeleteAdmin = () => {
+const useAddPipeline = () => {
+	const lan = "ENGLISH";
 	const queryClient = useQueryClient();
 
-	const deleteAdminData = async (id) => {
-		const { data } = await axios.delete(`/super/${id}`);
+	const postPipeline = async (formData) => {
+		formData.language = lan;
+		console.log("formData", formData);
+		const { data } = await axios.post(`/admin/pipeline`, formData);
 		return data;
 	};
 
 	const { mutate, data, isSuccess, isError, isLoading } = useMutation(
-		deleteAdminData,
+		postPipeline,
 		{
 			onSuccess: () => {
-				queryClient.invalidateQueries("AdminUserList");
+				queryClient.invalidateQueries("pipelineList");
 				console.log("success:", data);
 			},
 		}
@@ -22,4 +25,4 @@ const useDeleteAdmin = () => {
 	return { mutate, data, isSuccess, isError, isLoading };
 };
 
-export default useDeleteAdmin;
+export default useAddPipeline;

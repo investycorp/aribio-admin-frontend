@@ -1,19 +1,21 @@
 import axios from "axios";
 import { useMutation, useQueryClient } from "react-query";
 
-const useDeleteAdmin = () => {
+const useAddCi = () => {
+	const lan = "ENGLISH";
 	const queryClient = useQueryClient();
 
-	const deleteAdminData = async (id) => {
-		const { data } = await axios.delete(`/super/${id}`);
+	const postCiFile = async (formData) => {
+		formData.language = lan;
+		const { data } = await axios.post(`/admin/history`, formData);
 		return data;
 	};
 
 	const { mutate, data, isSuccess, isError, isLoading } = useMutation(
-		deleteAdminData,
+		postCiFile,
 		{
 			onSuccess: () => {
-				queryClient.invalidateQueries("AdminUserList");
+				queryClient.invalidateQueries("historyList");
 				console.log("success:", data);
 			},
 		}
@@ -22,4 +24,4 @@ const useDeleteAdmin = () => {
 	return { mutate, data, isSuccess, isError, isLoading };
 };
 
-export default useDeleteAdmin;
+export default useAddCi;
