@@ -1,39 +1,39 @@
 import React, { useState, useEffect } from "react";
-import AdminInfo from "../../atoms/AdminInfo";
 import { useRecoilState } from "recoil";
 import { useNavigate } from "react-router-dom";
 import { Container, Wrap } from "../../components/style";
 import Sidebar from "../../components/Sidebar";
-import { Button, Form, Input, Layout, Modal, Radio, Table } from "antd";
-import useHistoryList from "../../api/history/useHistoryList";
-import useAddHistory from "../../api/history/useAddHistory ";
-import useHistoryTypeList from "../../api/history/useHistoryTypeList ";
-import HistoryType from "./HistoryType";
-import useEditHistory from "../../api/history/useEditHistory ";
-import useDeleteHistory from "../../api/history/useDeleteHistory";
+import {
+    Badge,
+    Button,
+    Form,
+    Image,
+    Input,
+    Layout,
+    Modal,
+    Radio,
+    Table,
+    message,
+} from "antd";
+import useMediaList from "../../api/irpr/media/useMediaList";
+import useAddMedia from "../../api/irpr/media/useAddMedia";
+import useEditMedia from "../../api/irpr/media/useEditMedia";
+import useDeleteMedia from "../../api/irpr/media/useDeleteMedia";
 
-const History = () => {
-    const { Search } = Input;
+const Media = () => {
     const navigate = useNavigate();
     const [form] = Form.useForm();
-    const [adminInfo, setAdminInfo] = useRecoilState(AdminInfo);
     const [page, setPage] = useState(1);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalInfo, setModalInfo] = useState({});
     const [modalFor, setModalFor] = useState("");
-    const [filteredList, setFilteredList] = useState([]);
-    const [searchValue, setSearchValue] = useState("");
-    const { data, isLoading, isError, error } = useHistoryList();
-    const {
-        data: typeData,
-        isLoading: typeIsLoading,
-        isError: typeIsError,
-        error: typeError,
-    } = useHistoryTypeList();
-    const { mutate, isSuccess } = useAddHistory();
-    const { mutate: mutateEdit, isSuccess: isSuccessEdit } = useEditHistory();
-    const { mutate: mutateDelete, isSuccess: isSuccessDelete } =
-        useDeleteHistory();
+    const [selectedFile, setSelectedFile] = useState(null);
+
+    const { data, isLoading, refetch } = useMediaList();
+    const { mutate, isSuccess } = useAddMedia();
+    const { mutate: mutateEdit } = useEditMedia();
+    const { mutate: mutateDelete } = useDeleteMedia();
+
     const listColumns = [
         {
             title: "ID",
@@ -44,46 +44,43 @@ const History = () => {
             title: "Date",
             dataIndex: "date",
             key: "date",
-            sorter: (a, b) => a.date - b.date,
-            // filter: [
-            // 	{
-            // 		text: "2023",
-            // 		value: "2023",
-            // 	}
-            // ],
-            // render: (_, record) => (
-            //     <span>
-            //         {record?.year}-{record?.month.toString().length < 2 && "0"}
-            //         {record?.month}-{record?.day?.toString().length < 2 && "0"}
-            //         {record?.day}
-            //     </span>
-            // ),
+        },
+        {
+            title: "title",
+            dataIndex: "title",
+            key: "title",
         },
 
         {
-            title: "Category",
-            dataIndex: "historyTypeId",
-            key: "historyTypeId",
-            render: (id) => {
-                let type;
-                typeData?.data?.dataList.map((item) => {
-                    if (item?.id === id) {
-                        type = ` ${item?.startYear} ~ ${item?.endYear}`;
-                    }
-                });
-                return type;
-            },
+            title: "URL Type",
+            dataIndex: "url",
+            key: "url",
+            render: (url) =>
+                url.includes("youtube") ? (
+                    <span>
+                        <Badge color='red' />
+                        {"\t"}
+                        YouTube
+                    </span>
+                ) : url.includes("iwinv") ? (
+                    <span>
+                        <Badge status='processing' />
+                        {"\t"}
+                        Streaming
+                    </span>
+                ) : (
+                    <span>
+                        <Badge status='success' />
+                        {"\t"}
+                        Server
+                    </span>
+                ),
         },
         {
-            title: "Contents",
-            dataIndex: "contents",
-            key: "contents",
-            render: (text) => (
-                <span>
-                    {text?.slice(0, 45)}
-                    {text?.length > 45 && "..."}
-                </span>
-            ),
+            title: "Thumbnail",
+            dataIndex: "fileDto",
+            key: "fileDto",
+            render: (fileDto) => fileDto?.fileId && <Badge status='success' />,
         },
 
         {
@@ -100,13 +97,17 @@ const History = () => {
                     <Button
                         style={{ marginRight: "10px" }}
                         onClick={async (event) => {
+                            setModalFor("edit");
                             event.stopPropagation();
+                            setSelectedFile();
                             let editData = {
                                 id: record.id,
                                 date: record.date,
-                                historyTypeId: record.historyTypeId,
-                                contents: record.contents,
+                                title: record.title,
+                                url: record.url,
+                                fileDto: record.fileDto,
                             };
+                            console.log("editData", editData);
                             await setModalInfo(editData);
                             form.setFieldsValue(editData);
                             setTimeout(() => {
@@ -156,10 +157,7 @@ const History = () => {
         }
 
         if (data?.data.success) {
-            // console.log(data.data);
-            setFilteredList(data?.data?.dataList);
-        }
-        if (typeData?.data.success) {
+            console.log(data.data);
         }
     }, [data]);
 
@@ -167,16 +165,20 @@ const History = () => {
         await form
             .validateFields()
             .then(async (values) => {
-                const { year, month, day, contents, historyTypeId } =
-                    await values;
+                const { title, representative, url } = await values;
+
+                const add = {
+                    title,
+                    representative: representative ? true : false,
+                    url,
+                };
+
+                if (selectedFile) {
+                    add.file = selectedFile;
+                }
+
                 try {
-                    mutate({
-                        year,
-                        month,
-                        day,
-                        contents,
-                        historyTypeId,
-                    });
+                    mutate(add);
                 } catch (error) {
                     console.log(error);
                 } finally {
@@ -194,18 +196,22 @@ const History = () => {
         await form
             .validateFields()
             .then(async (values) => {
-                const { year, month, day, contents, historyTypeId } =
-                    await values;
-                const edit = await {
-                    year,
-                    month,
-                    day,
-                    contents,
-                    historyTypeId,
+                const { title, representative, url } = await values;
+
+                const edit = {
+                    title,
+                    representative: representative ? true : false,
+                    url,
                 };
+                if (selectedFile) {
+                    edit.file = selectedFile;
+                } else if (modalInfo.fileDto?.fileId) {
+                    edit.fileId = modalInfo.fileDto.fileId;
+                }
+
+                console.log("edit", edit);
 
                 try {
-                    console.log("edit: ", edit);
                     mutateEdit({ id, edit });
                 } catch (error) {
                     console.log(error);
@@ -234,68 +240,53 @@ const History = () => {
         form.resetFields();
         setModalInfo({});
         setIsModalOpen(false);
+        setSelectedFile();
         setModalFor("");
     };
 
-    const onSearch = (value) => {
-        setSearchValue(value);
-        let filteredData = data?.data?.dataList.filter((item) => {
-            return (
-                item.contents.toLowerCase().includes(value.toLowerCase()) ||
-                item.year.toString().includes(value)
-            );
-        });
-        setFilteredList(filteredData);
+    const handleFileChange = (event) => {
+        setSelectedFile(event.target.files[0]);
+        form.setFieldValue("fileUrl", "");
     };
 
     return (
         <Layout
             style={{
                 width: "100vw",
-                height: "100vh",
+                minHeight: "100vh",
                 display: "grid",
                 gridTemplateColumns: "200px 1fr",
-                overflow: "hidden",
             }}>
-            <Sidebar page='history' />
-            <Wrap style={{ width: "100%" }}>
-                <h1 style={{ width: "100%", textAlign: "start" }}>History</h1>
-                <HistoryType />
-
+            <Sidebar page='adminusers' />
+            <Wrap>
                 <div
                     style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "start",
                         width: "100%",
+                        height: "fit-content",
+                        padding: "0",
                     }}>
-                    <h2
+                    <h1>Media</h1>
+                    <div
                         style={{
+                            marginTop: "50px",
                             width: "100%",
-                            textAlign: "start",
-                            margin: "20px 0",
                         }}>
-                        History Contents
-                    </h2>
-                    <div>
                         <Button
                             type='primary'
                             onClick={() => {
                                 setModalFor("add");
                                 setModalInfo({});
                                 setIsModalOpen(true);
+                                setSelectedFile();
                             }}>
-                            Add Data
+                            Add Media
                         </Button>
                     </div>
-                    <div style={{ margin: "20px 0", width: "300px" }}>
-                        <Search
-                            placeholder='input search text'
-                            allowClear
-                            enterButton='Search'
-                            size='large'
-                            onSearch={onSearch}
-                        />
-                    </div>
                     <Table
-                        dataSource={filteredList}
+                        dataSource={data?.data?.data?.mediaKitDtoList}
                         columns={listColumns}
                         loading={isLoading}
                         style={{ marginTop: "20px", width: "100%" }}
@@ -304,64 +295,43 @@ const History = () => {
                 </div>
             </Wrap>
             <Modal
-                title={modalFor === "add" ? "Add New Admin" : "Edit Admin User"}
+                width={800}
+                title={modalFor === "add" ? "Add New Media" : "Edit Media"}
                 open={isModalOpen}
                 // confirmLoading={confirmLoading}
-                width={700}
+
                 onCancel={handleCancel}
                 footer={null}>
                 <Form
                     {...formItemLayout}
                     form={form}
-                    name={modalFor === "add" ? "addAdmin" : "editAdmin"}
+                    name={modalFor === "add" ? "addMedia" : "editMedia"}
                     autoComplete='off'>
                     {modalFor === "add" ? (
                         <>
                             <Form.Item
-                                label='Date'
-                                name='date'
+                                label='Title'
+                                name='title'
                                 rules={[
                                     {
                                         required: true,
                                         message: "Required field",
                                     },
-                                ]}>
+                                ]}
+                                style={{ marginTop: "30px" }}>
+                                <Input />
+                            </Form.Item>
+                            <Form.Item
+                                label='Is this Main Video?'
+                                name='representative'>
                                 <Input
-                                    autoFocus
-                                    style={{ width: "150px" }}
-                                    placeholder='YYYY-MM-DD'
+                                    type='checkbox'
+                                    style={{ width: "40px" }}
                                 />
                             </Form.Item>
-
                             <Form.Item
-                                label='Category'
-                                name='historyTypeId'
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: "Required field",
-                                    },
-                                ]}>
-                                <Radio.Group
-                                    initialValue={modalInfo?.historyTypeId}
-                                    buttonStyle='solid'>
-                                    {typeData?.data?.dataList.map((item) => {
-                                        if (item.id) {
-                                            return (
-                                                <Radio.Button
-                                                    key={item.id}
-                                                    value={item.id}>
-                                                    {item.startYear} ~{" "}
-                                                    {item.endYear}
-                                                </Radio.Button>
-                                            );
-                                        }
-                                    })}
-                                </Radio.Group>
-                            </Form.Item>
-                            <Form.Item
-                                label='Contents'
-                                name='contents'
+                                label='URL Link'
+                                name='url'
                                 rules={[
                                     {
                                         required: true,
@@ -370,6 +340,24 @@ const History = () => {
                                 ]}>
                                 <Input />
                             </Form.Item>
+                            <Form.Item label='Thumbnail Image'>
+                                <input
+                                    type='file'
+                                    id='file'
+                                    onChange={handleFileChange}
+                                />
+                            </Form.Item>
+                            {/* <Form.Item
+                                label='Upload Video'
+                                name='file'
+                                style={{ margin: "20px 0" }}>
+                                <Input
+                                    type='file'
+                                    value={selectedFile}
+                                    onChange={(e) => handleFileChange(e)}
+                                />
+                                <span>Upload to the server</span>
+                            </Form.Item> */}
 
                             <p
                                 style={{
@@ -392,55 +380,16 @@ const History = () => {
                         </>
                     ) : (
                         <>
-                            <Form.Item label='ID' style={{ margin: "0" }}>
+                            <Form.Item
+                                label='ID'
+                                name='id'
+                                style={{ marginTop: "30px" }}>
                                 {modalInfo.id}
                             </Form.Item>
                             <Form.Item
-                                label='Date'
-                                name='date'
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: "Required field",
-                                    },
-                                ]}>
-                                <Input
-                                    autoFocus
-                                    style={{ width: "150px" }}
-                                    placeholder='YYYY-MM-DD'
-                                />
-                            </Form.Item>
-                            <Form.Item
-                                label='Category'
-                                name='historyTypeId'
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: "Required field",
-                                    },
-                                ]}>
-                                {/* <Input style={{ width: "70px" }} /> */}
-                                <Radio.Group
-                                    initialValue={modalInfo?.historyTypeId}
-                                    buttonStyle='solid'>
-                                    {typeData?.data?.dataList.map((item) => {
-                                        if (item.id) {
-                                            return (
-                                                <Radio.Button
-                                                    key={item.id}
-                                                    value={item.id}>
-                                                    {item.startYear} ~{" "}
-                                                    {item.endYear}
-                                                </Radio.Button>
-                                            );
-                                        }
-                                    })}
-                                </Radio.Group>
-                            </Form.Item>
-                            <Form.Item
-                                layout='vertical'
-                                label='Contents'
-                                name='contents'
+                                label='Title'
+                                name='title'
+                                style={{ marginTop: "30px" }}
                                 rules={[
                                     {
                                         required: true,
@@ -449,6 +398,53 @@ const History = () => {
                                 ]}>
                                 <Input />
                             </Form.Item>
+                            <Form.Item
+                                label='Is this Main Video?'
+                                name='representative'>
+                                <Input
+                                    type='checkbox'
+                                    style={{ width: "40px" }}
+                                />
+                            </Form.Item>
+                            <Form.Item
+                                label='Link'
+                                name='url'
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Required field",
+                                    },
+                                ]}>
+                                <Input id='name' />
+                            </Form.Item>
+                            <Form.Item label='Thumbnail Image'>
+                                <span>{modalInfo.fileDto?.fileName}</span>
+                            </Form.Item>
+
+                            <Form.Item label='New Thumbnail'>
+                                <input
+                                    type='file'
+                                    id='file'
+                                    onChange={handleFileChange}
+                                />
+                                <p style={{ margin: "10px 0" }}>
+                                    * Current Image will be replaced with New
+                                    Image after [Edit]
+                                </p>
+                            </Form.Item>
+
+                            {/* <Form.Item label='Upload Video'>
+                                <input
+                                    type='file'
+                                    id='file'
+                                    onChange={handleFileChange}
+                                />
+                                <span>Upload to the server</span>
+                            </Form.Item> */}
+                            {/* <p style={{ margin: "10px 30px" }}>
+                                * Current Link will be replaced with New
+                                Uploaded Video Link after [Confirm]
+                            </p> */}
 
                             <p
                                 style={{
@@ -477,4 +473,4 @@ const History = () => {
     );
 };
 
-export default History;
+export default Media;

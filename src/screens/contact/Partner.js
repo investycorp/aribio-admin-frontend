@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useRecoilState } from "recoil";
 import { useNavigate } from "react-router-dom";
-import { Container, Wrap } from "../../components/style";
+import {
+    Container,
+    Wrap,
+    FormInput,
+    FormLabel,
+    FormRowWrap,
+} from "../../components/style";
 import Sidebar from "../../components/Sidebar";
 import {
     Badge,
@@ -12,16 +18,16 @@ import {
     Layout,
     Modal,
     Radio,
+    Select,
     Table,
-    message,
 } from "antd";
+import usePartnerList from "../../api/contact/partner/usePartnerList";
+import useAddPartner from "../../api/contact/partner/useAddPartner";
+import useEditPartner from "../../api/contact/partner/useEditPartner";
+import useDeletePartner from "../../api/contact/partner/useDeletePartner";
 
-import usePublicationList from "../../api/publication/usePublicationList";
-import useAddPublication from "../../api/publication/useAddPublication";
-import useEditPublication from "../../api/publication/useEditPublication";
-import useDeletePublication from "../../api/publication/useDeletePublication";
-
-const Publication = () => {
+const Partner = () => {
+    const { TextArea } = Input;
     const navigate = useNavigate();
     const [form] = Form.useForm();
     const [page, setPage] = useState(1);
@@ -30,10 +36,10 @@ const Publication = () => {
     const [modalFor, setModalFor] = useState("");
     const [selectedFile, setSelectedFile] = useState(null);
 
-    const { data, isLoading, refetch } = usePublicationList();
-    const { mutate, isSuccess } = useAddPublication();
-    const { mutate: mutateEdit } = useEditPublication();
-    const { mutate: mutateDelete } = useDeletePublication();
+    const { data, isLoading, refetch } = usePartnerList();
+    const { mutate, isSuccess } = useAddPartner();
+    const { mutate: mutateEdit } = useEditPartner();
+    const { mutate: mutateDelete } = useDeletePartner();
 
     const listColumns = [
         {
@@ -42,52 +48,17 @@ const Publication = () => {
             key: "idd",
         },
         {
-            title: "Date",
-            dataIndex: "date",
-            key: "date",
+            title: "Name",
+            dataIndex: "name",
+            key: "name",
         },
         {
-            title: "Type",
-            dataIndex: "type",
-            key: "type",
-        },
-        {
-            title: "Journal",
-            dataIndex: "journal",
-            key: "journal",
-            render: (text) => (
-                <span>
-                    {text?.slice(0, 10)}
-                    {text?.length > 10 && "..."}
-                </span>
-            ),
-        },
-        {
-            title: "Title",
-            dataIndex: "title",
-            key: "title",
-            render: (text) => (
-                <span>
-                    {text?.slice(0, 45)}
-                    {text?.length > 45 && "..."}
-                </span>
-            ),
+            title: "File Name",
+            dataIndex: "fileDto",
+            key: "fileDto",
+            render: (fileDto) => <span>{fileDto.fileName}</span>,
         },
 
-        {
-            title: "Link",
-            dataIndex: "url",
-            key: "url",
-            render: (_, record) => record.url && <Badge status='success' />,
-        },
-
-        {
-            title: "Thumbnail",
-            dataIndex: "fileUrl",
-            key: "fileUrl",
-            render: (_, record) =>
-                record?.fileDto?.fileUrl && <Badge status='processing' />,
-        },
         {
             title: "",
             key: "action",
@@ -107,14 +78,10 @@ const Publication = () => {
                             setSelectedFile();
                             let editData = {
                                 id: record.id,
-                                date: `${record.year}-${record.month}-${record.day}`,
-                                type: record.type,
-                                journal: record.journal,
-                                title: record.title,
-                                url: record.url,
-                                fileUrl: record.fileDto.fileUrl,
-                                fileId: record.fileDto.fileId,
+                                name: record.name,
+                                fileDto: record.fileDto,
                             };
+
                             await setModalInfo(editData);
                             form.setFieldsValue(editData);
                             setTimeout(() => {
@@ -147,6 +114,7 @@ const Publication = () => {
             ),
         },
     ];
+
     const formItemLayout = {
         labelCol: {
             xs: { span: 4 },
@@ -173,15 +141,12 @@ const Publication = () => {
         await form
             .validateFields()
             .then(async (values) => {
-                const { date, file, journal, title, type, url } = await values;
+                const { name } = await values;
+
                 try {
                     mutate({
-                        date,
                         file: selectedFile,
-                        journal,
-                        title,
-                        type,
-                        url,
+                        name,
                     });
                 } catch (error) {
                     console.log(error);
@@ -195,17 +160,21 @@ const Publication = () => {
                 window.alert("Please fill out all the required fields");
             });
     };
+
     const handleEdit = async (id) => {
         await form
             .validateFields()
             .then(async (values) => {
-                const { date, journal, title, type, url } = await values;
+                const { name } = await values;
 
-                const edit = { date, journal, title, type, url };
+                const edit = {
+                    name,
+                };
+
                 if (selectedFile) {
                     edit.file = selectedFile;
                 } else {
-                    edit.fileId = modalInfo.fileId;
+                    edit.fileId = modalInfo.fileDto.fileId;
                 }
 
                 try {
@@ -243,7 +212,6 @@ const Publication = () => {
 
     const handleFileChange = (event) => {
         setSelectedFile(event.target.files[0]);
-        form.setFieldValue("fileUrl", "");
     };
 
     return (
@@ -265,7 +233,7 @@ const Publication = () => {
                         height: "fit-content",
                         padding: "0",
                     }}>
-                    <h1>Publication</h1>
+                    <h1>Partners</h1>
                     <div
                         style={{
                             marginTop: "50px",
@@ -279,7 +247,7 @@ const Publication = () => {
                                 setIsModalOpen(true);
                                 setSelectedFile();
                             }}>
-                            Add Data
+                            Add Partner
                         </Button>
                     </div>
                     <Table
@@ -293,10 +261,11 @@ const Publication = () => {
             </Wrap>
             <Modal
                 width={800}
+                style={{ overflowY: "scroll" }}
                 title={
                     modalFor === "add"
-                        ? "Add New Publication"
-                        : "Edit Publication"
+                        ? "Add New Career post"
+                        : "Edit Career post"
                 }
                 open={isModalOpen}
                 // confirmLoading={confirmLoading}
@@ -306,57 +275,29 @@ const Publication = () => {
                 <Form
                     {...formItemLayout}
                     form={form}
-                    name={
-                        modalFor === "add"
-                            ? "addpublication"
-                            : "editpublication"
-                    }
+                    name={modalFor === "add" ? "addCareer" : "editCareer"}
                     autoComplete='off'>
                     {modalFor === "add" ? (
                         <>
                             <Form.Item
-                                label='Date'
-                                name='date'
-                                style={{ marginTop: "30px" }}>
-                                <Input
-                                    style={{ width: "130px" }}
-                                    placeholder='YYYY-MM-DD'
-                                />
+                                label='Name'
+                                name='name'
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Required field",
+                                    },
+                                ]}>
+                                <Input />
                             </Form.Item>
-                            <Form.Item label='Type' name='type'>
-                                <Radio.Group
-                                    initialValue={modalInfo?.type}
-                                    buttonStyle='solid'>
-                                    <Radio.Button
-                                        key='publication'
-                                        value='PUBLICATION'>
-                                        PUBLICATION
-                                    </Radio.Button>
 
-                                    <Radio.Button
-                                        key='conference'
-                                        value='CONFERENCE'>
-                                        CONFERENCE
-                                    </Radio.Button>
-                                </Radio.Group>
-                            </Form.Item>
-                            <Form.Item label='Journal' name='journal'>
-                                <Input />
-                            </Form.Item>
-                            <Form.Item label='Title' name='title'>
-                                <Input />
-                            </Form.Item>
-                            <Form.Item label='Link' name='url'>
-                                <Input />
-                            </Form.Item>
                             <Form.Item
-                                label='Thumbnail Upload'
+                                label='Image Upload'
                                 name='file'
                                 style={{ margin: "20px 0" }}>
-                                <Input
+                                <input
                                     type='file'
-                                    value={selectedFile}
-                                    onChange={(e) => handleFileChange(e)}
+                                    onChange={handleFileChange}
                                 />
                             </Form.Item>
 
@@ -382,67 +323,28 @@ const Publication = () => {
                     ) : (
                         <>
                             <Form.Item
-                                label='ID'
-                                name='id'
-                                style={{ marginTop: "30px" }}>
-                                {modalInfo.id}
-                            </Form.Item>
-                            <Form.Item label='Date' name='date'>
-                                <Input
-                                    style={{ width: "130px" }}
-                                    placeholder='YYYY-MM-DD'
-                                />
-                            </Form.Item>
-                            <Form.Item label='Type' name='type'>
-                                <Radio.Group
-                                    initialValue={modalInfo?.type}
-                                    buttonStyle='solid'>
-                                    <Radio.Button
-                                        key='publication'
-                                        value='PUBLICATION'>
-                                        PUBLICATION
-                                    </Radio.Button>
-
-                                    <Radio.Button
-                                        key='conference'
-                                        value='CONFERENCE'>
-                                        CONFERENCE
-                                    </Radio.Button>
-                                </Radio.Group>
-                            </Form.Item>
-                            <Form.Item label='Journal' name='journal'>
+                                label='Name'
+                                name='name'
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Required field",
+                                    },
+                                ]}>
                                 <Input />
                             </Form.Item>
-                            <Form.Item label='Title' name='title'>
-                                <Input />
+                            <Form.Item label='Image'>
+                                <span>{modalInfo.fileDto?.fileName}</span>
                             </Form.Item>
-                            <Form.Item label='Link' name='url'>
-                                <Input />
-                            </Form.Item>
-                            <Form.Item label='Thumbnail'>
-                                {!selectedFile && modalInfo?.fileUrl ? (
-                                    <Image
-                                        src={modalInfo?.fileUrl}
-                                        width={100}
-                                        height={150}
-                                    />
-                                ) : (
-                                    "No Image"
-                                )}
-                            </Form.Item>
-
-                            <Form.Item label='New Thumbnail'>
+                            <Form.Item
+                                label='New Image Upload'
+                                name='fileUpload'
+                                style={{ margin: "20px 0" }}>
                                 <input
                                     type='file'
-                                    id='file'
                                     onChange={handleFileChange}
                                 />
-                                <p>
-                                    *Current Thumbnail will be replaced with New
-                                    Image after [Confirm]
-                                </p>
                             </Form.Item>
-
                             <p
                                 style={{
                                     display: "flex",
@@ -470,4 +372,4 @@ const Publication = () => {
     );
 };
 
-export default Publication;
+export default Partner;

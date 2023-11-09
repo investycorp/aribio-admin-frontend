@@ -26,7 +26,6 @@ function Login() {
 
     useEffect(() => {
         if (window.localStorage.getItem("token")) {
-            console.log("token: ", window.localStorage.getItem("token"));
             navigate("/adminusers");
         }
     }, []);
@@ -34,6 +33,9 @@ function Login() {
     useEffect(() => {
         if (data?.error) {
             Message.error(data.error.message);
+            alert(data.error.message);
+            window.localStorage.removeItem("token");
+            window.localStorage.removeItem("role");
         }
 
         if (data?.success === true && data.data) {

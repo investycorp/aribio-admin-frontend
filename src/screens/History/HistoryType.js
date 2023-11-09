@@ -140,33 +140,43 @@ const HistoryType = () => {
 	}, [typeData]);
 
 	const handleAdd = async () => {
-		await form.validateFields().then(async (values) => {
-			const { startYear, endYear, title, subtitle } = await values;
-			try {
-				mutate({ startYear, endYear, title, subtitle });
-			} catch (error) {
-				console.log(error);
-			} finally {
-				// await refetch();
-				handleCancel();
-				// window.location.reload();
-			}
-		});
+		await form
+            .validateFields()
+            .then(async (values) => {
+                const { startYear, endYear, title, subtitle } = await values;
+                try {
+                    mutate({ startYear, endYear, title, subtitle });
+                } catch (error) {
+                    console.log(error);
+                } finally {
+                    // await refetch();
+                    handleCancel();
+                    // window.location.reload();
+                }
+            })
+            .catch((error) => {
+                window.alert("Please fill out all the required fields");
+            });;
 	};
 
 	const handleEdit = async (id) => {
-		await form.validateFields().then(async (values) => {
-			const { startYear, endYear, title, subtitle } = await values;
-			const edit = { startYear, endYear, title, subtitle };
+		await form
+            .validateFields()
+            .then(async (values) => {
+                const { startYear, endYear, title, subtitle } = await values;
+                const edit = { startYear, endYear, title, subtitle };
 
-			try {
-				mutateEdit({ id, edit });
-			} catch (error) {
-				console.log(error);
-			} finally {
-				handleCancel();
-			}
-		});
+                try {
+                    mutateEdit({ id, edit });
+                } catch (error) {
+                    console.log(error);
+                } finally {
+                    handleCancel();
+                }
+            })
+            .catch((error) => {
+                window.alert("Please fill out all the required fields");
+            });;
 	};
 
 	const handleDelete = async (id) => {

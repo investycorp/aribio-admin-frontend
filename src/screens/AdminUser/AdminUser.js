@@ -188,27 +188,43 @@ const AdminUser = () => {
 	};
 
 	const handleEditAdmin = async (id) => {
-		await form.validateFields().then(async (values) => {
-			const { name, password, userId, contact, department, jobGrade } =
-				await values;
-			const edit = await {
-				name: name,
-				userId: modalInfo.userId,
-				contact: contact,
-				department: department,
-				jobGrade: jobGrade,
-			};
-			if (changePassword && newPassword && passwordConfirm && passwordMatch)
-				edit.password = newPassword;
-			try {
-				console.log("edit: ", edit);
-				mutateEdit({ id, edit });
-			} catch (error) {
-				console.log(error);
-			} finally {
-				handleCancel();
-			}
-		});
+		await form
+            .validateFields()
+            .then(async (values) => {
+                const {
+                    name,
+                    password,
+                    userId,
+                    contact,
+                    department,
+                    jobGrade,
+                } = await values;
+                const edit = await {
+                    name: name,
+                    userId: modalInfo.userId,
+                    contact: contact,
+                    department: department,
+                    jobGrade: jobGrade,
+                };
+                if (
+                    changePassword &&
+                    newPassword &&
+                    passwordConfirm &&
+                    passwordMatch
+                )
+                    edit.password = newPassword;
+                try {
+                    console.log("edit: ", edit);
+                    mutateEdit({ id, edit });
+                } catch (error) {
+                    console.log(error);
+                } finally {
+                    handleCancel();
+                }
+            })
+            .catch((error) => {
+                window.alert("Please fill out all the required fields");
+            });;
 	};
 
 	const handleDeleteAdmin = async (id) => {

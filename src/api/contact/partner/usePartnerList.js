@@ -1,14 +1,14 @@
 import axios from "axios";
 import { useQuery, useQueryClient } from "react-query";
 
-const useHistoryTypeList = () => {
+const usePartnerList = () => {
     const lan = "ENGLISH";
     const queryClient = useQueryClient();
     const { data } = useQuery(
-        "historyTypeList",
-        () => axios.get(`/admin/history/type`, { params: { language: lan } }),
+        "partnerList",
+        () => axios.get(`/admin/partner`, { params: { language: lan } }),
         {
-            initialData: queryClient.getQueryData("historyTypeList"),
+            initialData: queryClient.getQueryData("partnerList"),
             onError: (error) => {
                 console.log("error", error?.message);
                 window.localStorage.removeItem("token");
@@ -21,4 +21,4 @@ const useHistoryTypeList = () => {
     return { data };
 };
 
-export default useHistoryTypeList;
+export default usePartnerList;

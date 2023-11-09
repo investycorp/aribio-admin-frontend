@@ -1,14 +1,17 @@
 import axios from "axios";
 import { useQuery, useQueryClient } from "react-query";
 
-const useHistoryTypeList = () => {
+const useJobGroupList = () => {
     const lan = "ENGLISH";
     const queryClient = useQueryClient();
     const { data } = useQuery(
-        "historyTypeList",
-        () => axios.get(`/admin/history/type`, { params: { language: lan } }),
+        "jobGroupList",
+        () =>
+            axios.get(`/admin/career/job-group`, {
+                params: { language: lan },
+            }),
         {
-            initialData: queryClient.getQueryData("historyTypeList"),
+            initialData: queryClient.getQueryData("jobGroupList"),
             onError: (error) => {
                 console.log("error", error?.message);
                 window.localStorage.removeItem("token");
@@ -21,4 +24,4 @@ const useHistoryTypeList = () => {
     return { data };
 };
 
-export default useHistoryTypeList;
+export default useJobGroupList;
