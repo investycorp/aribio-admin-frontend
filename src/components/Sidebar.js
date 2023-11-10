@@ -5,74 +5,105 @@ import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { UserOutlined } from "@ant-design/icons";
 
 function Sidebar({ pageName }) {
-    const location = useLocation();
-    const navigate = useNavigate();
+	const location = useLocation();
+	const navigate = useNavigate();
+	const [current, setCurrent] = React.useState(location.pathname.split("/")[1]);
+	const items = [
+		{
+			label: "Admin Users",
+			key: "adminusers",
+		},
+		{
+			label: "History",
+			key: "history",
+		},
+		{
+			label: "CI",
+			key: "ci",
+		},
+		{
+			label: "IR/PR",
+			key: "irpr",
+			children: [
+				{
+					label: "Notice",
+					key: "notice",
+				},
+				{
+					label: "Press Release",
+					key: "press",
+				},
+				{
+					label: "Media",
+					key: "media",
+				},
+			],
+		},
+		{
+			label: "Career",
+			key: "career",
+		},
+		{
+			label: "Contact",
+			key: "contact",
+			children: [
+				{
+					label: "Partner",
+					key: "partner",
+				},
+				{
+					label: "Contact",
+					key: "contactus",
+				},
+			],
+		},
+		{
+			label: "Pipeline",
+			key: "pipeline",
+		},
+		{
+			label: "Publication",
+			key: "publication",
+		},
+		{
+			label: "Link",
+			key: "link",
+		},
+		{
+			label: "Company Informaton",
+			key: "company-info",
+		},
+		{
+			label: "Sign Out",
+			key: "logout",
+			onClick: () => {
+				window.localStorage.removeItem("token");
+				window.localStorage.removeItem("role");
+				navigate("/");
+			},
+		},
+	];
 
-    if (!window.localStorage.getItem("token")) {
-        return <Navigate to='/login' state={{ from: location }} replace />;
-    }
+	if (!window.localStorage.getItem("token")) {
+		return <Navigate to='/login' state={{ from: location }} replace />;
+	}
+	const onClick = (e) => {
+		setCurrent(e.key);
+		navigate(`/${e.key}`);
+	};
 
-    return (
-        <Sider
-            style={{ padding: "10px 0", height: "100vh", overflow: "hidden" }}>
-            <Menu theme='dark' defaultSelectedKeys={[pageName]} mode='inline'>
-                <div>
-                    <Button>ENG</Button>
-                </div>
-                <Menu.Item key='adminusers'>
-                    <Link to='/adminusers'>Admin Users</Link>
-                </Menu.Item>
-                <Menu.Item key='history'>
-                    <Link to='/history'>History</Link>
-                </Menu.Item>
-                <Menu.Item key='ci'>
-                    <Link to='/ci'>CI</Link>
-                </Menu.Item>
-                <Menu.SubMenu title='IR/PR' key='irpr'>
-                    <Menu.Item key='notice'>
-                        <Link to='/notice'>Notice</Link>
-                    </Menu.Item>
-                    <Menu.Item key='press'>
-                        <Link to='/press'>Press Release</Link>
-                    </Menu.Item>
-                    <Menu.Item key='media'>
-                        <Link to='/media'>Media</Link>
-                    </Menu.Item>
-                </Menu.SubMenu>
-                <Menu.Item key='career'>
-                    <Link to='/career'>Career</Link>
-                </Menu.Item>
-                <Menu.SubMenu title='Contact' key='contact'>
-                    <Menu.Item key='partner'>
-                        <Link to='/partner'>Partner</Link>
-                    </Menu.Item>
-                    <Menu.Item key='contactus'>
-                        <Link to='/contact'>Contact</Link>
-                    </Menu.Item>
-                </Menu.SubMenu>
-                <Menu.Item key='pipeline'>
-                    <Link to='/pipeline'>Pipeline</Link>
-                </Menu.Item>
-                <Menu.Item key='publication'>
-                    <Link to='/publication'>Publication</Link>
-                </Menu.Item>
-
-                <Menu.Item key='links'>
-                    <Link to='/link'>Link</Link>
-                </Menu.Item>
-
-                <Menu.Item
-                    key='logout'
-                    onClick={() => {
-                        window.localStorage.removeItem("token");
-                        window.localStorage.removeItem("role");
-                        navigate("/");
-                    }}>
-                    Sign Out
-                </Menu.Item>
-            </Menu>
-        </Sider>
-    );
+	return (
+		<Sider style={{ padding: "10px 0", height: "100vh", overflow: "hidden" }}>
+			<Menu
+				theme='dark'
+				defaultSelectedKeys={[pageName]}
+				mode='inline'
+				items={items}
+				onClick={onClick}
+				selectedKeys={[current]}
+			/>
+		</Sider>
+	);
 }
 
 export default Sidebar;

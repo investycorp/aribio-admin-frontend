@@ -1,13 +1,27 @@
 import React, { useState, useEffect } from "react";
 import { useRecoilState } from "recoil";
 import { useNavigate } from "react-router-dom";
-import { Container, Wrap } from "../../components/style";
+import { Wrap } from "../../components/style";
 import Sidebar from "../../components/Sidebar";
-import { Button, Form, Input, Layout, Modal, Table, message } from "antd";
+import {
+	Badge,
+	Button,
+	Form,
+	Image,
+	Input,
+	Layout,
+	Modal,
+	Radio,
+	Select,
+	Table,
+} from "antd";
+import usePressList from "../../api/irpr/press/usePressList";
+import useAddPress from "../../api/irpr/press/useAddPress";
+import useDeletePress from "../../api/irpr/press/useDeletePress";
+import useEditPress from "../../api/irpr/press/useEditPress";
 
-import useCiList from "../../api/ci/useCiList";
-
-const Ci = () => {
+const Press = () => {
+	const { TextArea } = Input;
 	const navigate = useNavigate();
 	const [form] = Form.useForm();
 	const [page, setPage] = useState(1);
@@ -15,38 +29,37 @@ const Ci = () => {
 	const [modalInfo, setModalInfo] = useState({});
 	const [modalFor, setModalFor] = useState("");
 	const [selectedFile, setSelectedFile] = useState(null);
-	const [fileName, setFileName] = useState("");
-	const [fileType, setFileType] = useState("");
 
-	const { data, isLoading, refetch } = useCiList();
+	const { data, isLoading, refetch } = usePressList();
+	const { mutate, isSuccess } = useAddPress();
+	const { mutate: mutateEdit } = useEditPress();
+	const { mutate: mutateDelete } = useDeletePress();
 
 	const listColumns = [
 		{
 			title: "ID",
-			dataIndex: "fileId",
-			key: "fileId",
+			dataIndex: "id",
+			key: "idd",
 		},
 		{
-			title: "File Name",
-			dataIndex: "fileName",
-			key: "fileName",
+			title: "Date",
+			dataIndex: "date",
+			key: "date",
 		},
 		{
-			title: "File Type",
-			dataIndex: "fileType",
-			key: "fileType",
+			title: "Title",
+			dataIndex: "title",
+			key: "title",
+			render: (title) =>
+				title && title.length > 40 ? title.slice(0, 40) + "..." : title,
 		},
 		{
-			title: "File URL",
-			dataIndex: "fileUrl",
-			key: "fileUrl",
-			render: (text) => (
-				<span>
-					{text?.slice(0, 45)}
-					{text?.length > 45 && "..."}
-				</span>
-			),
+			title: "Image",
+			dataIndex: "fileDto",
+			key: "fileDto",
+			render: (fileDto) => fileDto && <Badge status='success' />,
 		},
+
 		{
 			title: "",
 			key: "action",
@@ -62,25 +75,19 @@ const Ci = () => {
 					<Button
 						style={{ marginRight: "10px" }}
 						onClick={async (event) => {
+							setModalFor("edit");
 							event.stopPropagation();
+							setSelectedFile();
 							let editData = {
 								id: record.id,
-								role: record.role,
-								userId: record.userId,
-								contact: record.contact,
-								department: record.department,
-								jobGrade: record.jobGrade,
+								title: record.title,
+								contents: record.contents,
+								fileDto: record.fileDto,
 							};
+							console.log("editData", editData);
+
 							await setModalInfo(editData);
-							form.setFieldsValue({
-								name: record.name,
-								id: record.id,
-								role: record.role,
-								userId: record.userId,
-								contact: record.contact,
-								department: record.department,
-								jobGrade: record.jobGrade,
-							});
+							form.setFieldsValue(editData);
 							setTimeout(() => {
 								setIsModalOpen(true);
 							}, 100);
@@ -97,7 +104,7 @@ const Ci = () => {
 								title: "Are you sure to delete this user?",
 
 								onOk() {
-									// handleDeleteAdmin(record.id);
+									handleDelete(record.id);
 								},
 								onCancel() {
 									handleCancel();
@@ -113,27 +120,90 @@ const Ci = () => {
 			),
 		},
 	];
+
 	const formItemLayout = {
 		labelCol: {
-			xs: { span: 8 },
-			sm: { span: 8 },
+			xs: { span: 4 },
+			sm: { span: 4 },
 		},
 		wrapperCol: {
-			xs: { span: 12 },
-			sm: { span: 12 },
+			xs: { span: 24 },
+			sm: { span: 24 },
 		},
 	};
 
 	useEffect(() => {
 		if (!window.localStorage.getItem("token")) {
 			navigate("/login");
-			// navigate("/history");
 		}
 
 		if (data?.data.success) {
 			// console.log(data.data);
 		}
 	}, [data]);
+
+	const handleAdd = async () => {
+		await form
+			.validateFields()
+			.then(async (values) => {
+				const { title, contents } = await values;
+				try {
+					mutate({
+						title,
+						contents,
+						file: selectedFile,
+					});
+				} catch (error) {
+					console.log(error);
+				} finally {
+					handleCancel();
+				}
+			})
+			.catch((error) => {
+				window.alert("Please fill out all the required fields");
+			});
+	};
+
+	const handleEdit = async (id) => {
+		await form
+			.validateFields()
+			.then(async (values) => {
+				const { title, contents } = await values;
+
+				const edit = {
+					title,
+					contents,
+				};
+				if (selectedFile) {
+					edit.file = selectedFile;
+				} else {
+					edit.fileId = modalInfo.fileDto?.fileId;
+				}
+
+				try {
+					mutateEdit({ id, edit });
+				} catch (error) {
+					console.log(error);
+				} finally {
+					handleCancel();
+				}
+			})
+			.catch((error) => {
+				window.alert("Please fill out all the required fields");
+			});
+	};
+
+	const handleDelete = async (id) => {
+		try {
+			mutateDelete(id);
+		} catch (error) {
+			console.log(error);
+		} finally {
+			// await refetch();
+			handleCancel();
+			// window.location.reload();
+		}
+	};
 
 	const handleCancel = () => {
 		form.resetFields();
@@ -145,8 +215,7 @@ const Ci = () => {
 
 	const handleFileChange = (event) => {
 		setSelectedFile(event.target.files[0]);
-		setFileName(event.target.files[0].name.split(".")[0]);
-		setFileType(event.target.files[0].name.split(".")[1].toUpperCase());
+		form.setFieldValue("fileUrl", "");
 	};
 
 	return (
@@ -170,7 +239,7 @@ const Ci = () => {
 						padding: "0",
 					}}
 				>
-					<h1>CI</h1>
+					<h1>Press Release</h1>
 					<div
 						style={{
 							marginTop: "50px",
@@ -183,22 +252,25 @@ const Ci = () => {
 								setModalFor("add");
 								setModalInfo({});
 								setIsModalOpen(true);
+								setSelectedFile();
 							}}
 						>
-							Add CI
+							Add Data
 						</Button>
 					</div>
 					<Table
-						dataSource={data?.data?.dataList[0].fileDtoList}
+						dataSource={data?.data?.dataList}
 						columns={listColumns}
 						loading={isLoading}
 						style={{ marginTop: "20px", width: "100%" }}
-						rowKey={(record) => record.fileId}
+						rowKey={(record) => record.id}
 					/>
 				</div>
 			</Wrap>
 			<Modal
-				title={modalFor === "add" ? "Add New CI" : "Edit CI File"}
+				width={800}
+				style={{ overflowY: "scroll" }}
+				title={modalFor === "add" ? "Add New Pipeline" : "Edit Pipeline"}
 				open={isModalOpen}
 				// confirmLoading={confirmLoading}
 
@@ -208,18 +280,25 @@ const Ci = () => {
 				<Form
 					{...formItemLayout}
 					form={form}
-					name={modalFor === "add" ? "addCi" : "editCi"}
+					name={modalFor === "add" ? "addpipeline" : "editpipeline"}
 					autoComplete='off'
 				>
 					{modalFor === "add" ? (
 						<>
 							<Form.Item
-								label='File Upload'
-								name='fileUpload'
-								style={{ margin: "20px 0" }}
+								label='Title'
+								name='title'
+								style={{ marginTop: "30px" }}
 							>
-								<input type='file' onChange={handleFileChange} />
+								<Input />
 							</Form.Item>
+							<Form.Item label='Contents' name='contents'>
+								<TextArea rows={4} />
+							</Form.Item>
+							<Form.Item label='Image Upload' style={{ margin: "20px 0" }}>
+								<input type='file' id='file' onChange={handleFileChange} />
+							</Form.Item>
+
 							<p
 								style={{
 									display: "flex",
@@ -233,7 +312,8 @@ const Ci = () => {
 									type='primary'
 									onClick={(event) => {
 										event.stopPropagation();
-										// handleAddAdmin();
+
+										handleAdd();
 									}}
 								>
 									Confirm
@@ -243,59 +323,37 @@ const Ci = () => {
 						</>
 					) : (
 						<>
-							<Form.Item label='ID' style={{ margin: "0" }}>
+							<Form.Item label='ID' name='id' style={{ marginTop: "30px" }}>
 								{modalInfo.id}
 							</Form.Item>
-							<Form.Item label='User ID'>{modalInfo.userId}</Form.Item>
-
 							<Form.Item
-								label='Name'
-								name='name'
-								rules={[
-									{
-										required: true,
-										message: "Required field",
-									},
-								]}
+								label='Title'
+								name='title'
+								style={{ marginTop: "30px" }}
 							>
 								<Input />
 							</Form.Item>
-							<Form.Item
-								label='Department'
-								name='department'
-								rules={[
-									{
-										required: true,
-										message: "Required field",
-									},
-								]}
-							>
-								<Input />
+							<Form.Item label='Contents' name='contents'>
+								<TextArea rows={4} />
 							</Form.Item>
-							<Form.Item
-								label='Job Title'
-								name='jobGrade'
-								rules={[
-									{
-										required: true,
-										message: "Required field",
-									},
-								]}
-							>
-								<Input />
+							<Form.Item label='Thumbnail'>
+								{!selectedFile && modalInfo?.fileDto ? (
+									<Image
+										src={modalInfo?.fileDto?.fileUrl}
+										width={150}
+										height={150}
+									/>
+								) : (
+									"No Image"
+								)}
 							</Form.Item>
 
-							<Form.Item
-								label='Contact'
-								name='contact'
-								rules={[
-									{
-										required: true,
-										message: "Required field",
-									},
-								]}
-							>
-								<Input />
+							<Form.Item label='Image Upload'>
+								<input type='file' id='file' onChange={handleFileChange} />
+								<p>
+									*Current Thumbnail will be replaced with New Image after
+									[Confirm]
+								</p>
 							</Form.Item>
 
 							<p
@@ -312,7 +370,7 @@ const Ci = () => {
 									type='primary'
 									onClick={(event) => {
 										event.stopPropagation();
-										// handleEditAdmin(modalInfo.id);
+										handleEdit(modalInfo.id);
 									}}
 								>
 									Edit
@@ -327,4 +385,4 @@ const Ci = () => {
 	);
 };
 
-export default Ci;
+export default Press;
