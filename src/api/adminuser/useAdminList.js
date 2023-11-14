@@ -14,6 +14,7 @@ const useAdminList = () => {
                 window.localStorage.removeItem("role");
                 window.location.href = "/login";
             },
+            retry: 1,
         }
     );
     return { data, isLoading, refetch };

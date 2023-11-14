@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "react-query";
 const useJobGroupList = () => {
     const lan = "ENGLISH";
     const queryClient = useQueryClient();
-    const { data } = useQuery(
+    const { data, refetch } = useQuery(
         "jobGroupList",
         () =>
             axios.get(`/admin/career/job-group`, {
@@ -21,7 +21,7 @@ const useJobGroupList = () => {
         }
     );
 
-    return { data };
+    return { data, refetch };
 };
 
 export default useJobGroupList;

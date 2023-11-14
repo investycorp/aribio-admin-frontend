@@ -351,12 +351,11 @@ const Publication = () => {
                             </Form.Item>
                             <Form.Item
                                 label='Thumbnail Upload'
-                                name='file'
                                 style={{ margin: "20px 0" }}>
-                                <Input
+                                <input
                                     type='file'
-                                    value={selectedFile}
-                                    onChange={(e) => handleFileChange(e)}
+                                    id='file'
+                                    onChange={handleFileChange}
                                 />
                             </Form.Item>
 

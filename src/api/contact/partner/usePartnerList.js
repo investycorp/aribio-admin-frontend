@@ -1,10 +1,13 @@
 import axios from "axios";
 import { useQuery, useQueryClient } from "react-query";
+import Language from "../../../atoms/Language";
+import { useRecoilState } from "recoil";
 
 const usePartnerList = () => {
-    const lan = "ENGLISH";
+    const [language, setLanguage] = useRecoilState(Language);
+    const lan = language === "ENG" ? "ENGLISH" : "KOREAN";
     const queryClient = useQueryClient();
-    const { data } = useQuery(
+    const { data, refetch } = useQuery(
         "partnerList",
         () => axios.get(`/admin/partner`, { params: { language: lan } }),
         {
@@ -15,10 +18,11 @@ const usePartnerList = () => {
                 window.localStorage.removeItem("role");
                 window.location.href = "/login";
             },
+            retry: 1,
         }
     );
 
-    return { data };
+    return { data, refetch };
 };
 
 export default usePartnerList;

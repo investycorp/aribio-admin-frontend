@@ -111,12 +111,12 @@ const Career = () => {
                             setSelectedFile();
                             let editData = {
                                 id: record.id,
-                                jobGroupDto: record.jobGroupDto,
-                                jobGroupId: record.jobGroupDto.id,
-                                location: record.location,
-                                fileDtoList: record.fileDtoList,
-                                url: record.url,
-                                popupContents: record.popupContents,
+                                jobGroupDto: record?.jobGroupDto,
+                                jobGroupId: record?.jobGroupDto.id,
+                                location: record?.location,
+                                fileDtoList: record?.fileDtoList,
+                                url: record?.url,
+                                popupContents: record?.popupContents,
                             };
 
                             await setModalInfo(editData);
@@ -222,7 +222,7 @@ const Career = () => {
                 if (selectedFile) {
                     edit.popupFile = selectedFile;
                 } else {
-                    edit.popupFileId = modalInfo.fileDtoList[0].fileId;
+                    edit.popupFileId = modalInfo?.fileDtoList[0]?.fileId;
                 }
                 console.log("edit", edit);
 
