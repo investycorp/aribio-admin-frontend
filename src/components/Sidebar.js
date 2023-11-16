@@ -120,7 +120,11 @@ function Sidebar({ pageName }) {
   }
   const onClick = (e) => {
     setCurrent(e.key);
-    navigate(`/${e.key}`);
+    if (e.key === "logout") {
+      navigate("/");
+    } else {
+      navigate(`/${e.key}`);
+    }
   };
 
   const refetchAll = async () => {

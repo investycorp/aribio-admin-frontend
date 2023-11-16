@@ -110,7 +110,7 @@ const AdminUser = () => {
           >
             Edit
           </Button>
-          {record.role !== "SUPER_ADMIN" && (
+          {!["SUPER_ADMIN", "ROLE_SUPER_ADMIN"].includes(record.role) && (
             <Button
               danger
               onClick={(event) => {
