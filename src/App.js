@@ -21,60 +21,62 @@ import Footer from "./screens/footer/Footer";
 const queryClient = new QueryClient();
 
 function App() {
-	const [initialized, setInitialized] = useState(false);
-	const initialize = async () => {
-		axios.defaults.baseURL = "https://api.aribio.boundary.team/";
-		axios.interceptors.request.use(
-			async (config) => {
-				const token = window.localStorage.getItem("token");
+  const [initialized, setInitialized] = useState(false);
+  const initialize = async () => {
+    axios.defaults.baseURL = "https://api.aribio.boundary.team/";
+    axios.interceptors.request.use(
+      async (config) => {
+        const token = window.localStorage.getItem("token");
 
-				if (token && config.headers) {
-					config.headers.Authorization = `${token}`;
-				}
+        if (token && config.headers) {
+          config.headers.Authorization = `${token}`;
+          // config.headers.AccessControlAllowOrigin = "*";
+          // config.headers.AccessControlAllowMethods = "*";
+        }
 
-				return config;
-			},
-			(error) => Promise.reject(error)
-		);
+        return config;
+      },
+      (error) => Promise.reject(error)
+    );
 
-		setInitialized(true);
-	};
+    setInitialized(true);
+  };
 
-	useEffect(() => {
-		initialize();
-	}, []);
+  useEffect(() => {
+    initialize();
+  }, []);
 
-	if (!initialized) {
-		return null;
-	}
-	return (
-		<div className='App'>
-			<RecoilRoot>
-				<QueryClientProvider client={queryClient}>
-					<BrowserRouter>
-						<Routes>
-							<Route path='/' element={<Login />} />
-							<Route path='/adminusers' element={<AdminUser />} />
+  if (!initialized) {
+    return null;
+  }
+  return (
+    <div className="App">
+      <RecoilRoot>
+        <QueryClientProvider client={queryClient}>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Login />} />
+              <Route path="/adminusers" element={<AdminUser />} />
 
-							<Route path='/history' element={<History />} />
-							<Route path='/ci' element={<Ci />} />
-							<Route path='/publication' element={<Publication />} />
-							<Route path='/pipeline' element={<Pipeline />} />
-							<Route path='/career' element={<Career />} />
-							<Route path='/partner' element={<Partner />} />
-							<Route path='/contact' element={<Contact />} />
-							<Route path='/media' element={<Media />} />
-							<Route path='/notice' element={<Notice />} />
-							<Route path='/press' element={<Press />} />
-							<Route path='/link' element={<Link />} />
-							<Route path='/company-info' element={<Footer />} />
-							<Route path='/login' element={<Login />} />
-						</Routes>
-					</BrowserRouter>
-				</QueryClientProvider>
-			</RecoilRoot>
-		</div>
-	);
+              <Route path="/history" element={<History />} />
+              <Route path="/ci" element={<Ci />} />
+              <Route path="/publication" element={<Publication />} />
+              <Route path="/pipeline" element={<Pipeline />} />
+              <Route path="/career" element={<Career />} />
+              <Route path="/partner" element={<Partner />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/media" element={<Media />} />
+              <Route path="/notice" element={<Notice />} />
+              <Route path="/press" element={<Press />} />
+              <Route path="/link" element={<Link />} />
+              <Route path="/company-info" element={<Footer />} />
+              <Route path="/login" element={<Login />} />
+            </Routes>
+          </BrowserRouter>
+        </QueryClientProvider>
+      </RecoilRoot>
+    </div>
+  );
 }
 
 export default App;

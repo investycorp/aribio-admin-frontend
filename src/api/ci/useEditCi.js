@@ -1,27 +1,34 @@
 import axios from "axios";
 import { useMutation, useQueryClient } from "react-query";
+import { useRecoilState } from "recoil";
+import Language from "../../atoms/Language";
 
-const useEditHistory = () => {
-	const lan = "ENGLISH";
-	const queryClient = useQueryClient();
+const useEditCi = () => {
+  const [language, setLanguage] = useRecoilState(Language);
+  const lan = language === "ENG" ? "ENGLISH" : "KOREAN";
+  const queryClient = useQueryClient();
 
-	const editHistoryData = async ({ id, edit }) => {
-		edit.language = lan;
-		const { data } = await axios.put(`/admin/history/${id}`, edit);
-		return data;
-	};
+  const editCiData = async ({ id, edit }) => {
+    edit.language = lan;
+    const { data } = await axios.put(`/admin/ci/${id}`, edit, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return data;
+  };
 
-	const { mutate, data, isSuccess, isError, isLoading } = useMutation(
-		editHistoryData,
-		{
-			onSuccess: () => {
-				queryClient.invalidateQueries("historyList");
-				console.log("success:", data);
-			},
-		}
-	);
+  const { mutate, data, isSuccess, isError, isLoading } = useMutation(
+    editCiData,
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries("ciList");
+        console.log("success:", data);
+      },
+    }
+  );
 
-	return { mutate, data, isSuccess, isError, isLoading };
+  return { mutate, data, isSuccess, isError, isLoading };
 };
 
-export default useEditHistory;
+export default useEditCi;
