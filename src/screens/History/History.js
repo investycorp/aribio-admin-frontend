@@ -167,13 +167,11 @@ const History = () => {
         await form
             .validateFields()
             .then(async (values) => {
-                const { year, month, day, contents, historyTypeId } =
-                    await values;
+                const { date, contents, historyTypeId } = await values;
+
                 try {
                     mutate({
-                        year,
-                        month,
-                        day,
+                        date,
                         contents,
                         historyTypeId,
                     });
