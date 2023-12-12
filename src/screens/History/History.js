@@ -4,25 +4,26 @@ import { useRecoilState } from "recoil";
 import { useNavigate } from "react-router-dom";
 import { Container, Wrap } from "../../components/style";
 import Sidebar from "../../components/Sidebar";
-import { Button, Form, Input, Layout, Modal, Radio, Table } from "antd";
+import { Button, DatePicker, Form, Input, Layout, Modal, Radio, Table } from "antd";
 import useHistoryList from "../../api/history/useHistoryList";
 import useAddHistory from "../../api/history/useAddHistory ";
 import useHistoryTypeList from "../../api/history/useHistoryTypeList ";
 import HistoryType from "./HistoryType";
 import useEditHistory from "../../api/history/useEditHistory ";
 import useDeleteHistory from "../../api/history/useDeleteHistory";
+import moment from 'moment';
 
 const History = () => {
     const { Search } = Input;
     const navigate = useNavigate();
     const [form] = Form.useForm();
-    const [adminInfo, setAdminInfo] = useRecoilState(AdminInfo);
-    const [page, setPage] = useState(1);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalInfo, setModalInfo] = useState({});
     const [modalFor, setModalFor] = useState("");
     const [filteredList, setFilteredList] = useState([]);
     const [searchValue, setSearchValue] = useState("");
+    const [isFormValid, setIsFormValid] = useState(false);
+
     const { data, isLoading, isError, error } = useHistoryList();
     const {
         data: typeData,
@@ -246,6 +247,36 @@ const History = () => {
         setFilteredList(filteredData);
     };
 
+    const handleFieldsChange = (_, allFields) => {
+        const isAllFieldsValid = allFields.every(field => field.errors.length === 0);
+        setIsFormValid(isAllFieldsValid);
+    };
+
+    const isValidDate = (value) => {
+        const regex = /^\d{4}-\d{2}-\d{2}$/;
+        if (!regex.test(value)) {
+            return false;
+        }
+
+        const date = new Date(value);
+        const timestamp = date.getTime();
+
+        if (typeof timestamp !== 'number' || Number.isNaN(timestamp)) {
+            return false;
+        }
+
+        return date.toISOString().startsWith(value);
+    };
+
+    const dateValidationRule = {
+        validator: (_, value) => {
+            if (!value || isValidDate(value)) {
+                return Promise.resolve();
+            }
+            return Promise.reject(new Error('Invalid date format. Use YYYY-MM-DD'));
+        },
+    };
+
     return (
         <Layout
             style={{
@@ -310,6 +341,7 @@ const History = () => {
                 footer={null}>
                 <Form
                     {...formItemLayout}
+                    onFieldsChange={handleFieldsChange}
                     form={form}
                     name={modalFor === "add" ? "addAdmin" : "editAdmin"}
                     autoComplete='off'>
@@ -323,14 +355,10 @@ const History = () => {
                                         required: true,
                                         message: "Required field",
                                     },
+                                    dateValidationRule
                                 ]}>
-                                <Input
-                                    autoFocus
-                                    style={{ width: "150px" }}
-                                    placeholder='YYYY-MM-DD'
-                                />
+                                <Input placeholder='YYYY-MM-DD' style={{width: 150}} />
                             </Form.Item>
-
                             <Form.Item
                                 label='Category'
                                 name='historyTypeId'
@@ -379,6 +407,7 @@ const History = () => {
                                 }}>
                                 <Button
                                     type='primary'
+                                    disabled={!isFormValid}
                                     onClick={(event) => {
                                         event.stopPropagation();
                                         handleAdd();
@@ -401,12 +430,9 @@ const History = () => {
                                         required: true,
                                         message: "Required field",
                                     },
+                                    dateValidationRule,
                                 ]}>
-                                <Input
-                                    autoFocus
-                                    style={{ width: "150px" }}
-                                    placeholder='YYYY-MM-DD'
-                                />
+                               <Input placeholder="YYYY-MM-DD" style={{width: 150}} />
                             </Form.Item>
                             <Form.Item
                                 label='Category'
@@ -457,8 +483,8 @@ const History = () => {
                                     alignItems: "center",
                                 }}>
                                 <Button
-                                    disabled={false}
                                     type='primary'
+                                    disabled={false}
                                     onClick={(event) => {
                                         event.stopPropagation();
                                         handleEdit(modalInfo.id);

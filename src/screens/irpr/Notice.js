@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useRecoilState } from "recoil";
 import { useNavigate } from "react-router-dom";
 import { Wrap } from "../../components/style";
 import Sidebar from "../../components/Sidebar";
@@ -11,8 +10,6 @@ import {
 	Input,
 	Layout,
 	Modal,
-	Radio,
-	Select,
 	Table,
 } from "antd";
 
@@ -281,17 +278,16 @@ const Notice = () => {
 			<Modal
 				width={800}
 				style={{ overflowY: "scroll" }}
-				title={modalFor === "add" ? "Add New Pipeline" : "Edit Pipeline"}
+				title={modalFor === "add" ? "Add New Notice" : "Edit Notice"}
 				open={isModalOpen}
 				// confirmLoading={confirmLoading}
-
 				onCancel={handleCancel}
 				footer={null}
 			>
 				<Form
 					{...formItemLayout}
 					form={form}
-					name={modalFor === "add" ? "addpipeline" : "editpipeline"}
+					name={modalFor === "add" ? "addnotice" : "editnotice"}
 					autoComplete='off'
 				>
 					{modalFor === "add" ? (
@@ -300,10 +296,23 @@ const Notice = () => {
 								label='Title'
 								name='title'
 								style={{ marginTop: "30px" }}
-							>
+								rules={[
+									{
+											required: true,
+											message: "Required field",
+									}
+								]}>
 								<Input />
 							</Form.Item>
-							<Form.Item label='Contents' name='contents'>
+							<Form.Item
+								label='Contents'
+								name='contents'
+								rules={[
+									{
+											required: true,
+											message: "Required field",
+									}
+								]}>
 								<TextArea rows={4} />
 							</Form.Item>
 							<Form.Item label='Image Upload' style={{ margin: "20px 0" }}>
@@ -341,10 +350,23 @@ const Notice = () => {
 								label='Title'
 								name='title'
 								style={{ marginTop: "30px" }}
-							>
+								rules={[
+									{
+											required: true,
+											message: "Required field",
+									}
+							]}>
 								<Input />
 							</Form.Item>
-							<Form.Item label='Contents' name='contents'>
+							<Form.Item
+								label='Contents'
+								name='contents'			
+								rules={[
+									{
+											required: true,
+											message: "Required field",
+									},
+							]}>
 								<TextArea rows={4} />
 							</Form.Item>
 							<Form.Item label='Thumbnail'>

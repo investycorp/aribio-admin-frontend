@@ -11,8 +11,6 @@ import {
 	Input,
 	Layout,
 	Modal,
-	Radio,
-	Select,
 	Table,
 } from "antd";
 import usePressList from "../../api/irpr/press/usePressList";
@@ -270,7 +268,7 @@ const Press = () => {
 			<Modal
 				width={800}
 				style={{ overflowY: "scroll" }}
-				title={modalFor === "add" ? "Add New Pipeline" : "Edit Pipeline"}
+				title={modalFor === "add" ? "Add New Press Release" : "Edit Press Release"}
 				open={isModalOpen}
 				// confirmLoading={confirmLoading}
 
@@ -280,7 +278,7 @@ const Press = () => {
 				<Form
 					{...formItemLayout}
 					form={form}
-					name={modalFor === "add" ? "addpipeline" : "editpipeline"}
+					name={modalFor === "add" ? "addpress" : "editpress"}
 					autoComplete='off'
 				>
 					{modalFor === "add" ? (
@@ -289,10 +287,23 @@ const Press = () => {
 								label='Title'
 								name='title'
 								style={{ marginTop: "30px" }}
-							>
+								rules={[
+									{
+											required: true,
+											message: "Required field",
+									}
+								]}>
 								<Input />
 							</Form.Item>
-							<Form.Item label='Contents' name='contents'>
+							<Form.Item
+								label='Contents'
+								name='contents'
+								rules={[
+									{
+											required: true,
+											message: "Required field",
+									}
+								]}>
 								<TextArea rows={4} />
 							</Form.Item>
 							<Form.Item label='Image Upload' style={{ margin: "20px 0" }}>
@@ -330,10 +341,23 @@ const Press = () => {
 								label='Title'
 								name='title'
 								style={{ marginTop: "30px" }}
-							>
+								rules={[
+									{
+											required: true,
+											message: "Required field",
+									}
+								]}>
 								<Input />
 							</Form.Item>
-							<Form.Item label='Contents' name='contents'>
+							<Form.Item
+								label='Contents'
+								name='contents'
+								rules={[
+									{
+											required: true,
+											message: "Required field",
+									}
+								]}>
 								<TextArea rows={4} />
 							</Form.Item>
 							<Form.Item label='Thumbnail'>

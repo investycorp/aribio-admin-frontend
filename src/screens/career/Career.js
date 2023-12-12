@@ -13,11 +13,9 @@ import {
   Badge,
   Button,
   Form,
-  Image,
   Input,
   Layout,
   Modal,
-  Radio,
   Select,
   Table,
 } from "antd";
@@ -335,7 +333,6 @@ const Career = () => {
               <Form.Item
                 label="Location"
                 name="location"
-                mode="tags"
                 rules={[
                   {
                     required: true,
@@ -344,14 +341,7 @@ const Career = () => {
                 ]}
                 style={{ marginTop: "30px" }}
               >
-                <Select
-                  defaultValue="Select Location"
-                  style={{ width: 150 }}
-                  options={[
-                    { value: "KOREA", label: "KOREA" },
-                    { value: "GLOBAL", label: "GLOBAL" },
-                  ]}
-                />
+                <Input width={100} />
               </Form.Item>
               <Form.Item
                 label="Job Title"
@@ -364,7 +354,7 @@ const Career = () => {
                 ]}
               >
                 <Select
-                  value={"Select Job Title"}
+                  placeholder="Select Job Title"
                   options={jobGroupData?.data?.dataList?.map((item) => ({
                     value: item.id,
                     label: item.name,

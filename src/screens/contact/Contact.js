@@ -2,28 +2,18 @@ import React, { useState, useEffect } from "react";
 import { useRecoilState } from "recoil";
 import { useNavigate } from "react-router-dom";
 import {
-    Container,
-    Wrap,
-    FormInput,
-    FormLabel,
-    FormRowWrap,
+    Wrap
 } from "../../components/style";
 import Sidebar from "../../components/Sidebar";
 import {
-    Badge,
-    Button,
     Form,
-    Image,
     Input,
     Layout,
-    Modal,
-    Radio,
-    Select,
     Table,
 } from "antd";
 import useContactList from "../../api/contact/contactus/useContactList";
 
-const Contact = () => {
+const ContactUs = () => {
     const { TextArea } = Input;
     const navigate = useNavigate();
     const [form] = Form.useForm();
@@ -121,4 +111,4 @@ const Contact = () => {
     );
 };
 
-export default Contact;
+export default ContactUs;

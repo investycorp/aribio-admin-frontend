@@ -172,14 +172,12 @@ const Ci = () => {
     setModalFor("");
   };
 
-  const handleFileChange = (event) => {
-    if (event.target.files[0].name.split(".")[1].toUpperCase() === "PNG") {
-      setPngFile(event.target.files[0]);
-    } else if (
-      event.target.files[0].name.split(".")[1].toUpperCase() === "AI"
-    ) {
-      setAiFile(event.target.files[0]);
-    }
+  const handlePngFileChange = (event) => {
+    setPngFile(event.target.files[0]);
+  };
+  
+  const handleAiFileChange = (event) => {
+    setAiFile(event.target.files[0]);
   };
 
   return (
@@ -309,7 +307,7 @@ const Ci = () => {
               </Form.Item>
 
               <Form.Item label="New AI Image">
-                <input type="file" id="file" onChange={handleFileChange} />
+                <input type="file" id="file" onChange={handleAiFileChange} />
                 <p>
                   *Current Image will be replaced with New Image after [Edit]
                 </p>
@@ -323,7 +321,7 @@ const Ci = () => {
               </Form.Item>
 
               <Form.Item label="New PNG Image">
-                <input type="file" id="file" onChange={handleFileChange} />
+                <input type="file" id="file" onChange={handlePngFileChange} />
                 <p>
                   *Current Image will be replaced with New Image after [Edit]
                 </p>

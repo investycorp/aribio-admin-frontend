@@ -264,8 +264,8 @@ const Partner = () => {
                 style={{ overflowY: "scroll" }}
                 title={
                     modalFor === "add"
-                        ? "Add New Career post"
-                        : "Edit Career post"
+                        ? "Add New Partners"
+                        : "Edit Partners"
                 }
                 open={isModalOpen}
                 // confirmLoading={confirmLoading}
@@ -275,7 +275,7 @@ const Partner = () => {
                 <Form
                     {...formItemLayout}
                     form={form}
-                    name={modalFor === "add" ? "addCareer" : "editCareer"}
+                    name={modalFor === "add" ? "addPartners" : "editPartners"}
                     autoComplete='off'>
                     {modalFor === "add" ? (
                         <>
@@ -292,9 +292,15 @@ const Partner = () => {
                             </Form.Item>
 
                             <Form.Item
-                                label='Image Upload'
+                                label='Image'
                                 name='file'
-                                style={{ margin: "20px 0" }}>
+                                style={{ margin: "20px 0" }}
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Required field",
+                                    },
+                                ]}>
                                 <input
                                     type='file'
                                     onChange={handleFileChange}

@@ -83,8 +83,8 @@ function Sidebar({ pageName }) {
           key: "partner",
         },
         {
-          label: "Contact",
-          key: "contactus",
+          label: "Contact Us",
+          key: "contactUs",
         },
       ],
     },

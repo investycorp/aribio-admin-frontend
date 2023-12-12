@@ -21,8 +21,10 @@ const useAddMedia = () => {
         {
             onSuccess: () => {
                 queryClient.invalidateQueries("mediaList");
-                console.log("success:", data);
             },
+            onError: (error) => {
+                window.alert("Only one representative video can be set.");
+            }
         }
     );
 

@@ -7,7 +7,6 @@ const useEditMedia = () => {
 
     const editMedia = async ({ id, edit }) => {
         edit.language = lan;
-        console.log(edit);
         const { data } = await axios.put(`/admin/media-kit/${id}`, edit, {
             headers: {
                 "Content-Type": "multipart/form-data",
@@ -21,8 +20,10 @@ const useEditMedia = () => {
         {
             onSuccess: () => {
                 queryClient.invalidateQueries("mediaList");
-                console.log("success:", data);
             },
+            onError: error => {
+                window.alert("Only one representative video can be set.");
+            }
         }
     );
 
