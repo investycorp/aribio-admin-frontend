@@ -1,17 +1,14 @@
 import React, { useState, useEffect } from "react";
-import AdminInfo from "../../atoms/AdminInfo";
-import { useRecoilState } from "recoil";
 import { useNavigate } from "react-router-dom";
-import { Container, Wrap } from "../../components/style";
+import { Wrap } from "../../components/style";
 import Sidebar from "../../components/Sidebar";
-import { Button, DatePicker, Form, Input, Layout, Modal, Radio, Table } from "antd";
+import { Button, Form, Input, Layout, Modal, Radio, Table } from "antd";
 import useHistoryList from "../../api/history/useHistoryList";
 import useAddHistory from "../../api/history/useAddHistory ";
 import useHistoryTypeList from "../../api/history/useHistoryTypeList ";
 import HistoryType from "./HistoryType";
 import useEditHistory from "../../api/history/useEditHistory ";
 import useDeleteHistory from "../../api/history/useDeleteHistory";
-import moment from 'moment';
 
 const History = () => {
     const { Search } = Input;
@@ -140,6 +137,7 @@ const History = () => {
             ),
         },
     ];
+    
     const formItemLayout = {
         labelCol: {
             xs: { span: 4 },

@@ -45,6 +45,10 @@ function Sidebar({ pageName }) {
       key: "adminusers",
     },
     {
+      label: "Popup",
+      key: "popup",
+    },
+    {
       label: "History",
       key: "history",
     },

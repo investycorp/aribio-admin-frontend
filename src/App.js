@@ -17,6 +17,7 @@ import Link from "./screens/link/Link";
 import Notice from "./screens/irpr/Notice";
 import Press from "./screens/irpr/Press";
 import Footer from "./screens/footer/Footer";
+import Popup from "./screens/popup/Popup.js";
 
 const queryClient = new QueryClient();
 
@@ -57,6 +58,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Login />} />
               <Route path="/adminusers" element={<AdminUser />} />
+              <Route path="/popup" element={<Popup />} />
               <Route path="/history" element={<History />} />
               <Route path="/ci" element={<Ci />} />
               <Route path="/publication" element={<Publication />} />
