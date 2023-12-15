@@ -436,7 +436,7 @@ const Popup = () => {
                             <Radio.Group
                                 initialValue={modalInfo?.historyTypeId}
                                 buttonStyle='solid'>
-                                {typeData?.data?.dataList.map((item) => {
+                                {/* {typeData?.data?.dataList.map((item) => {
                                     if (item.id) {
                                         return (
                                             <Radio.Button
@@ -447,7 +447,7 @@ const Popup = () => {
                                             </Radio.Button>
                                         );
                                     }
-                                })}
+                                })} */}
                             </Radio.Group>
                         </Form.Item>
                         <Form.Item
@@ -512,7 +512,7 @@ const Popup = () => {
                             <Radio.Group
                                 initialValue={modalInfo?.historyTypeId}
                                 buttonStyle='solid'>
-                                {typeData?.data?.dataList.map((item) => {
+                                {/* {typeData?.data?.dataList.map((item) => {
                                     if (item.id) {
                                         return (
                                             <Radio.Button
@@ -523,7 +523,7 @@ const Popup = () => {
                                             </Radio.Button>
                                         );
                                     }
-                                })}
+                                })} */}
                             </Radio.Group>
                         </Form.Item>
                         <Form.Item

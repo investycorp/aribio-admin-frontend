@@ -18,6 +18,8 @@ import useContactList from "../api/contact/contactus/useContactList";
 import useFooterList from "../api/footer/useFooterList";
 import useCareerList from "../api/career/useCareerList";
 import useJobGroupList from "../api/career/jobGroup/useJobGroupList";
+import useAdvisorList from "../api/aboutus/advisor/useAdvisorList";
+import useLeadershipList from "../api/aboutus/leadership/useLeadershipList";
 
 function Sidebar({ pageName }) {
   const [language, setLanguage] = useRecoilState(Language);
@@ -38,6 +40,8 @@ function Sidebar({ pageName }) {
   const { refetch: refetchFooter } = useFooterList();
   const { refetch: refetchCareer } = useCareerList();
   const { refetch: refetchJobGroup } = useJobGroupList();
+  const { refetch: refetchAdvisor } = useAdvisorList();
+  const { refetch: refetchLeadership   } = useLeadershipList();
 
   const items = [
     {
@@ -89,6 +93,20 @@ function Sidebar({ pageName }) {
         {
           label: "Contact Us",
           key: "contactUs",
+        },
+      ],
+    },
+    {
+      label: "About Us",
+      key: "aboutus",
+      children: [
+        {
+          label: "Leadership",
+          key: "leadership",
+        },
+        {
+          label: "Advisor",
+          key: "advisor",
         },
       ],
     },
@@ -146,6 +164,8 @@ function Sidebar({ pageName }) {
     await refetchFooter();
     await refetchCareer();
     await refetchJobGroup();
+    await refetchAdvisor();
+    await refetchLeadership();
   };
 
   const onLanguageChange = async () => {
