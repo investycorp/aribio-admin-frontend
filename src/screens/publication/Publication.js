@@ -421,7 +421,12 @@ const Publication = () => {
                                 <Input />
                             </Form.Item>
                             <Form.Item
-                                label='Thumbnail'
+                                 label={
+                                    <>
+                                        <span style={{color: '#ff4d4f', fontSize: 14}}>* </span>
+                                        <span>Thumbnail</span>
+                                    </>
+                                }
                                 style={{ margin: "20px 0" }}>
                                 <div>
                                     <input
@@ -443,7 +448,7 @@ const Publication = () => {
                                 }}>
                                 <Button
                                     type='primary'
-                                    disabled={!isFormValid}
+                                    disabled={!isFormValid || !selectedFile}
                                     onClick={(event) => {
                                         event.stopPropagation();
                                         handleAdd();

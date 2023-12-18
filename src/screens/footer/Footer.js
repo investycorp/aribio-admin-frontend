@@ -280,7 +280,14 @@ const Footer = () => {
                     form={form}
                     name={"editInfo"}
                     autoComplete='off'>
-                    <Form.Item label='US Address'>
+                    <Form.Item
+                        label={
+                            <>
+                                <span style={{color: '#ff4d4f', fontSize: 14}}>* </span>
+                                <span>US Address</span>
+                            </>
+                        }
+                    >
                         <Form.Item
                             name='usAddress1'
                             rules={[
@@ -312,7 +319,14 @@ const Footer = () => {
                             <Input />
                         </Form.Item>
                     </Form.Item>
-                    <Form.Item label='Head Office'>
+                    <Form.Item
+                     label={
+                        <>
+                            <span style={{color: '#ff4d4f', fontSize: 14}}>* </span>
+                            <span>Head Address</span>
+                        </>
+                    }
+                    >
                         <Form.Item
                             name='headAddress1'
                             rules={[
@@ -392,7 +406,21 @@ const Footer = () => {
                         )}
                     </Form.Item>
 
-                    <Form.Item label='New Logo'>
+                    <Form.Item
+                    
+                        label={
+                            <>
+                                {
+                                    !modalInfo?.fileDto?.fileUrl && (
+
+                                        <span style={{color: '#ff4d4f', fontSize: 14}}>* </span>
+                                        )
+                                }
+                                
+                                <span>New Logo</span>
+                            </>
+                        }
+                    >
                         <input
                             type='file'
                             id='file'

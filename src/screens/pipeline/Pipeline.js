@@ -36,7 +36,10 @@ const Pipeline = () => {
 	const [modalInfo, setModalInfo] = useState({});
 	const [modalFor, setModalFor] = useState("");
 	const [selectedFile, setSelectedFile] = useState(null);
-	const [indication, setIndication] = useState([{ indication: "", phase: "" }]);
+	const [isFormValid, setIsFormValid] = useState(false);
+  const [allIndicationsFilled, setAllIndicationsFilled] = useState(false);
+
+	const [indication, setIndication] = useState([{ indication: "", phase: "IND-enabling" }]);
 	const [len, setLen] = useState(1);
 	const phaseList = [
 		"IND-enabling",
@@ -276,6 +279,16 @@ const Pipeline = () => {
 		setIndication(temp);
 	};
 
+	const handleFieldsChange = (_, allFields) => {
+		const isAllFieldsValid = allFields.every(field => field.errors.length === 0);
+		setIsFormValid(isAllFieldsValid);
+};
+
+	useEffect(() => {
+		const filled = indication.every(item => item.indication.trim() !== '');
+		setAllIndicationsFilled(filled);
+	}, [indication]); 
+
 	return (
 		<Layout
 			style={{
@@ -338,6 +351,7 @@ const Pipeline = () => {
 				<Form
 					{...formItemLayout}
 					form={form}
+					onFieldsChange={handleFieldsChange}
 					name={modalFor === "add" ? "addpipeline" : "editpipeline"}
 					autoComplete='off'
 				>
@@ -346,27 +360,71 @@ const Pipeline = () => {
 							<Form.Item
 								label='Drugcandidate'
 								name='drugCandidate'
+								rules={[
+									{
+											required: true,
+											message: "Required field",
+									},
+								]}
 								style={{ marginTop: "30px" }}
 							>
 								<Input style={{ width: "130px" }} />
 							</Form.Item>
-							<Form.Item label='Modality' name='modality'>
+							<Form.Item label='Modality' name='modality'
+								rules={[
+									{
+											required: true,
+											message: "Required field",
+									},
+								]}
+							>
 								<Input />
 							</Form.Item>
-							<Form.Item label='Target' name='target'>
+							<Form.Item label='Target' name='target'
+								rules={[
+									{
+											required: true,
+											message: "Required field",
+									},
+								]}
+							>
 								<Input />
 							</Form.Item>
 
-							<Form.Item label='Pop-Up Title' name='popUpTitle'>
+							<Form.Item label='Pop-Up Title' name='popUpTitle'
+								rules={[
+									{
+											required: true,
+											message: "Required field",
+									},
+								]}
+							>
 								<Input />
 							</Form.Item>
-							<Form.Item label='Pop-Up Contents' name='popUpContents'>
+							<Form.Item label='Pop-Up Contents' name='popUpContents'
+								rules={[
+									{
+											required: true,
+											message: "Required field",
+									},
+								]}
+							>
 								<TextArea rows={4} />
 							</Form.Item>
-							<Form.Item label='Indication/Phase'></Form.Item>
+							<Form.Item label='Indication/Phase'
+								rules={[
+									{
+											required: true,
+											message: "Required field",
+									},
+								]}
+							></Form.Item>
 							<div>
 								{indication?.map((item, index) => (
 									<FormRowWrap key={"indication input" + index}>
+										<FormLabel style={{color: '#ff4d4f', fontSize: 14}}htmlFor={"indication" + index}>
+											*
+										</FormLabel>
 										<FormLabel htmlFor={"indication" + index}>
 											Indication:
 										</FormLabel>
@@ -454,6 +512,7 @@ const Pipeline = () => {
 							>
 								<Button
 									type='primary'
+									disabled={!isFormValid || !allIndicationsFilled}
 									onClick={(event) => {
 										event.stopPropagation();
 
@@ -473,33 +532,76 @@ const Pipeline = () => {
 							<Form.Item
 								label='Drugcandidate'
 								name='drugCandidate'
+								rules={[
+									{
+											required: true,
+											message: "Required field",
+									},
+								]}
 								style={{ marginTop: "30px" }}
 							>
 								<Input style={{ width: "130px" }} />
 							</Form.Item>
-							<Form.Item label='Modality' name='modality'>
+							<Form.Item label='Modality' name='modality'
+								rules={[
+									{
+											required: true,
+											message: "Required field",
+									},
+								]}
+							>
 								<Input />
 							</Form.Item>
-							<Form.Item label='Target' name='target'>
+							<Form.Item label='Target' name='target'
+								rules={[
+									{
+											required: true,
+											message: "Required field",
+									},
+								]}
+							>
 								<Input />
 							</Form.Item>
 
-							<Form.Item label='Pop-Up Title' name='popUpTitle'>
+							<Form.Item label='Pop-Up Title' name='popUpTitle'
+								rules={[
+									{
+											required: true,
+											message: "Required field",
+									},
+								]}
+							>
 								<Input />
 							</Form.Item>
-							<Form.Item label='Pop-Up Contents' name='popUpContents'>
+							<Form.Item label='Pop-Up Contents' name='popUpContents'
+								rules={[
+									{
+											required: true,
+											message: "Required field",
+									},
+								]}
+							>
 								<TextArea rows={4} />
 							</Form.Item>
 							<Form.Item label='Indication/Phase'></Form.Item>
 							<div>
 								{indication?.map((item, index) => (
 									<FormRowWrap key={"indication input" + index}>
+										<FormLabel style={{color: '#ff4d4f', fontSize: 14}}htmlFor={"indication" + index}>
+											*
+										</FormLabel>
 										<FormLabel htmlFor={"indication" + index}>
 											Indication:
 										</FormLabel>
 										<FormInput
 											id={"indication" + index}
 											value={indication[index].indication}
+											rules={[
+												{
+														required: true,
+														message: "Required field",
+												},
+											]}
 											onChange={(e) => {
 												handleDynamicChange(e, index, "indication");
 											}}
@@ -569,7 +671,6 @@ const Pipeline = () => {
 									</Button>
 								</FormRowWrap>
 							</div>
-
 							<p
 								style={{
 									display: "flex",
@@ -580,7 +681,7 @@ const Pipeline = () => {
 								}}
 							>
 								<Button
-									disabled={false}
+									disabled={!isFormValid || !allIndicationsFilled}
 									type='primary'
 									onClick={(event) => {
 										event.stopPropagation();

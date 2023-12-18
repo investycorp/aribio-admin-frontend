@@ -34,6 +34,7 @@ const Leadership = () => {
     const [modalInfo, setModalInfo] = useState({});
     const [modalFor, setModalFor] = useState("");
     const [selectedFile, setSelectedFile] = useState(null);
+    const [isFormValid, setIsFormValid] = useState(false);
 
     const { data, isLoading, refetch } = useLeadershipList();
     const { mutate, isError: errorAdd } = useAddLeadership();
@@ -41,7 +42,7 @@ const Leadership = () => {
     const { mutate: mutateDelete } = useDeleteLeadership();
 
     const [types, setTypes] = useState(['CEO', 'HEAD', 'US']);
-
+    const [type, setType] = useState('CEO');
     const listColumns = [
         {
             title: "ID",
@@ -161,6 +162,11 @@ const Leadership = () => {
         }
     }, [data]);
 
+    const handleFieldsChange = (_, allFields) => {
+        const isAllFieldsValid = allFields.every(field => field.errors.length === 0);
+        setIsFormValid(isAllFieldsValid);
+    };
+
     const handleAdd = async () => {
         await form
             .validateFields()
@@ -239,9 +245,17 @@ const Leadership = () => {
     };
 
     const handleFileChange = (event) => {
-        setSelectedFile(event.target.files[0]);
-        console.log(event.target.files[0])
-        form.setFieldValue("fileUrl", "");
+        const file = event.target.files[0];
+        if (file) {
+            const allowedExtensions = /(\.jpg|\.jpeg|\.png)$/i;
+            if (!allowedExtensions.exec(file.name)) {
+              alert('Invalid file type. Only JPG, JPEG, PNG files are allowed.');
+              event.target.value = '';
+              return;
+            }
+            setSelectedFile(file);
+            form.setFieldValue("fileUrl", "");
+          }
     };
 
     return (
@@ -303,6 +317,7 @@ const Leadership = () => {
                     {...formItemLayout}
                     form={form}
                     name={modalFor === "add" ? "addLeadership" : "editLeadership"}
+                    onFieldsChange={handleFieldsChange}
                     autoComplete='off'>
                     {modalFor === "add" ? (
                         <>
@@ -322,6 +337,10 @@ const Leadership = () => {
                                         value: item,
                                         label: item,
                                     }))}
+                                    onChange={() => {
+                                        setType(form.getFieldValue('leadershipType'));
+                                        
+                                      }}
                                     />
                             </Form.Item>
                             <Form.Item
@@ -361,15 +380,26 @@ const Leadership = () => {
                                 <TextArea rows={4} />
                             </Form.Item>
                            
-                            <Form.Item label='Photo'>
-                                <input
-                                    type='file'
-                                    id='file'
-                                    onChange={handleFileChange}
-                                />
-                                
+                            <Form.Item
+                                label={
+                                    <>
+                                        {form.getFieldValue('leadershipType') !== 'HEAD' && (
+                                            <span style={{color: '#ff4d4f', fontSize: 14}}>* </span>
+                                        )}
+                                        
+                                        <span>New Photo</span>
+                                    </>
+                                }
+                            >
+                                <div>
+                                    <input
+                                        type='file'
+                                        id='file'
+                                        onChange={handleFileChange}
+                                    />
+                                    <span>(jpg, png only)</span>
+                                </div>   
                             </Form.Item>
-
                             <p
                                 style={{
                                     display: "flex",
@@ -380,6 +410,9 @@ const Leadership = () => {
                                 }}>
                                 <Button
                                     type='primary'
+                                    disabled={
+                                        type !== 'HEAD' ? !isFormValid : (!selectedFile && !isFormValid)
+                                    }
                                     onClick={(event) => {
                                         event.stopPropagation();
                                         handleAdd();
@@ -412,6 +445,10 @@ const Leadership = () => {
                                             value: item,
                                             label: item,
                                         }))}
+                                        onChange={() => {
+                                            setType(form.getFieldValue('leadershipType'));
+                                            
+                                          }}
                                         />
                             </Form.Item>
                             <Form.Item
@@ -456,19 +493,20 @@ const Leadership = () => {
                                 <Image src={modalInfo.fileDto?.fileUrl} width={200} />
                                 </div>
                             </Form.Item>
-
-                            <Form.Item label='New Photo'>
-                                <input
-                                    type='file'
-                                    id='file'
-                                    onChange={handleFileChange}
-                                />
+                            <Form.Item label="New Photo">
+                                <div>
+                                    <input
+                                        type='file'
+                                        id='file'
+                                        onChange={handleFileChange}
+                                        />
+                                    <span>(jpg, png only)</span>
+                                </div>
                                 <p style={{ margin: "10px 0" }}>
                                     * Current Image will be replaced with New
                                     Image after [Edit]
                                 </p>
                             </Form.Item>
-
                             {/* <Form.Item label='Upload Video'>
                                 <input
                                     type='file'
