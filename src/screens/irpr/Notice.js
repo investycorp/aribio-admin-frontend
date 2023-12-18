@@ -222,8 +222,17 @@ const Notice = () => {
 	};
 
 	const handleFileChange = (event) => {
-		setSelectedFile(event.target.files[0]);
-		form.setFieldValue("fileUrl", "");
+		const file = event.target.files[0];
+		if (file) {
+				const allowedExtensions = /(\.jpg|\.jpeg|\.png)$/i;
+				if (!allowedExtensions.exec(file.name)) {
+					alert('Invalid file type. Only JPG, JPEG, PNG files are allowed.');
+					event.target.value = '';
+					return;
+				}
+				setSelectedFile(file);
+				form.setFieldValue("fileUrl", "");
+			}
 	};
 
 	return (
@@ -316,7 +325,14 @@ const Notice = () => {
 								<TextArea rows={4} />
 							</Form.Item>
 							<Form.Item label='Image Upload' style={{ margin: "20px 0" }}>
-								<input type='file' id='file' onChange={handleFileChange} />
+								<div>
+									<input
+											type='file'
+											id='file'
+											onChange={handleFileChange}
+									/>
+									<span>(jpg, png only)</span>
+                </div>
 							</Form.Item>
 
 							<p
@@ -382,7 +398,14 @@ const Notice = () => {
 							</Form.Item>
 
 							<Form.Item label='Image Upload'>
-								<input type='file' id='file' onChange={handleFileChange} />
+								<div>
+									<input
+											type='file'
+											id='file'
+											onChange={handleFileChange}
+									/>
+									<span>(jpg, png only)</span>
+                </div>
 								<p>
 									*Current Thumbnail will be replaced with New Image after
 									[Confirm]

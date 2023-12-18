@@ -52,7 +52,7 @@ const Career = () => {
       key: "idd",
     },
     {
-      title: "Locaation",
+      title: "Location",
       dataIndex: "location",
       key: "location",
     },

@@ -242,8 +242,17 @@ const Publication = () => {
     };
 
     const handleFileChange = (event) => {
-        setSelectedFile(event.target.files[0]);
-        form.setFieldValue("fileUrl", "");
+        const file = event.target.files[0];
+        if (file) {
+            const allowedExtensions = /(\.jpg|\.jpeg|\.png)$/i;
+            if (!allowedExtensions.exec(file.name)) {
+              alert('Invalid file type. Only JPG, JPEG, PNG files are allowed.');
+              event.target.value = '';
+              return;
+            }
+            setSelectedFile(file);
+            form.setFieldValue("fileUrl", "");
+          }
     };
 
     const handleFieldsChange = (_, allFields) => {
@@ -414,11 +423,14 @@ const Publication = () => {
                             <Form.Item
                                 label='Thumbnail'
                                 style={{ margin: "20px 0" }}>
-                                <input
-                                    type='file'
-                                    id='file'
-                                    onChange={handleFileChange}
-                                />
+                                <div>
+                                    <input
+                                        type='file'
+                                        id='file'
+                                        onChange={handleFileChange}
+                                    />
+                                    <span>(jpg, png only)</span>
+                                </div>
                             </Form.Item>
 
                             <p
@@ -526,11 +538,14 @@ const Publication = () => {
                             </Form.Item>
 
                             <Form.Item label='New Thumbnail'>
-                                <input
-                                    type='file'
-                                    id='file'
-                                    onChange={handleFileChange}
-                                />
+                                <div>
+                                    <input
+                                        type='file'
+                                        id='file'
+                                        onChange={handleFileChange}
+                                    />
+                                    <span>(jpg, png only)</span>
+                                </div>
                                 <p>
                                     *Current Thumbnail will be replaced with New
                                     Image after [Confirm]

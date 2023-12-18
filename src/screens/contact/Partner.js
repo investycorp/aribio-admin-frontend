@@ -211,7 +211,17 @@ const Partner = () => {
     };
 
     const handleFileChange = (event) => {
-        setSelectedFile(event.target.files[0]);
+        const file = event.target.files[0];
+        if (file) {
+            const allowedExtensions = /(\.png)$/i;
+            if (!allowedExtensions.exec(file.name)) {
+              alert('Invalid file type. Only PNG files are allowed.');
+              event.target.value = '';
+              return;
+            }
+            setSelectedFile(file);
+            form.setFieldValue("fileUrl", "");
+          }
     };
 
     return (
@@ -301,10 +311,14 @@ const Partner = () => {
                                         message: "Required field",
                                     },
                                 ]}>
-                                <input
-                                    type='file'
-                                    onChange={handleFileChange}
-                                />
+                                <div>
+                                    <input
+                                        type='file'
+                                        id='file'
+                                        onChange={handleFileChange}
+                                    />
+                                    <span>(png only)</span>
+                                </div>
                             </Form.Item>
 
                             <p
@@ -346,10 +360,14 @@ const Partner = () => {
                                 label='New Image Upload'
                                 name='fileUpload'
                                 style={{ margin: "20px 0" }}>
-                                <input
-                                    type='file'
-                                    onChange={handleFileChange}
-                                />
+                               <div>
+                                    <input
+                                        type='file'
+                                        id='file'
+                                        onChange={handleFileChange}
+                                    />
+                                    <span>(png only)</span>
+                                </div>
                             </Form.Item>
                             <p
                                 style={{

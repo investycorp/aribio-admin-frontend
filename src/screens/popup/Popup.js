@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Layout, Table, Input, Form, Modal, Radio, Upload } from "antd";
+import { Button, Layout, Table, Input, Form, Modal, Radio, Upload, Image } from "antd";
 import { Wrap } from "../../components/style";
 import Sidebar from "../../components/Sidebar";
 import { useNavigate } from "react-router-dom";
@@ -20,17 +20,6 @@ const Popup = () => {
 
 
     const [isFormValid, setIsFormValid] = useState(false);
-
-    const [widthError, setWidthError] = useState('');
-    const [lengthError, setLengthError] = useState('');
-    const [leftError, setLeftError] = useState('');
-    const [topError, setTopError] = useState('');
-
-    const [startDateError, setStartDateError] = useState('');
-    const [endDateError, setEndDateError] = useState('');
-    const [startHourError, setStartHourError] = useState('');
-    const [endHourError, setEndHourError] = useState('');
-
 	const [filteredList, setFilteredList] = useState([]);
 
 
@@ -163,20 +152,20 @@ const Popup = () => {
                     <Button
                         style={{ marginRight: "10px" }}
                         onClick={async (event) => {
-                            setModalFor("edit");
-                            console.log(record);
                             event.stopPropagation();
+                            setModalFor("edit");
+                            
                             let editData = {
                                 id: record.id,
                                 title: record.title,
                                 fileUrl: record.fileDto.fileUrl,
                                 fileId: record.fileDto.fileId,
                                 startDate: record.startDate,
-                                startHour: record.startHour.toString(),
+                                startHour: record.startHour,
                                 endDate: record.endDate,
-                                endHour: record.endHour.toString(),
-                                useStatus: record.useStatus,
-                                closeButtonStatus: record.closeButtonStatus,
+                                endHour: record.endHour,
+                                useStatus: record.useStatus.toString(),
+                                closeButtonStatus: record.closeButtonStatus.toString(),
                                 width: record.width,
                                 length: record.length,
                                 top: record.topSide,
@@ -184,11 +173,13 @@ const Popup = () => {
                                 link: record.link,
                                 type: record.type,
                             };
-                            await setModalInfo(editData);
+
+                            setModalInfo(editData);
+                            console.log(editData);
                             form.setFieldsValue(editData);
-                            setTimeout(() => {
-                                setIsModalOpen(true);
-                            }, 100);
+                            
+                            setIsModalOpen(true);
+                            
                         }}>
                         Edit
                     </Button>
@@ -317,6 +308,13 @@ const Popup = () => {
                     type,
                 };
 
+                if (selectedFile) {
+                    edit.file = selectedFile;
+                } else if (modalInfo.fileId) {
+                    edit.fileId = modalInfo.fileId;
+                }
+
+
                 try {
                     mutateEdit({ id, edit });
                 } catch (error) {
@@ -374,8 +372,17 @@ const Popup = () => {
     };
 
     const handleFileChange = (event) => {
-        setSelectedFile(event.target.files[0]);
-        form.setFieldValue("fileUrl", "");
+        const file = event.target.files[0];
+        if (file) {
+            const allowedExtensions = /(\.jpg|\.jpeg|\.png)$/i;
+            if (!allowedExtensions.exec(file.name)) {
+              alert('Invalid file type. Only JPG, JPEG, PNG files are allowed.');
+              event.target.value = '';
+              return;
+            }
+            setSelectedFile(file);
+            form.setFieldValue("fileUrl", "");
+          }
     };
 
     const handleFieldsChange = (_, allFields) => {
@@ -414,67 +421,12 @@ const Popup = () => {
     
     const hourValidationRule = {
         validator: (_, value) => {
-        const hour = parseInt(value, 10);
-        if (!isNaN(hour) && isValidHour(value)) {
-            return Promise.resolve();
+            const hour = parseInt(value, 10);
+            if (!isNaN(hour) && isValidHour(value)) {
+                return Promise.resolve();
+            }
+            return Promise.reject(new Error('The value must be a number between 0 and 23'));
         }
-        return Promise.reject(new Error('The value must be a number between 0 and 23'));
-    }
-    };
-
-    const handleStartDateChange = (e) => {
-        const value = e.target.value;
-        form.setFieldsValue({ startDate: e.target.value });
-        setStartDateError(isValidDate(value) ? '' : 'Invalid date format. Use YYYY-MM-DD');
-    };
-
-    const handleEndDateChange = (e) => {
-        const value = e.target.value;
-        form.setFieldsValue({ endDate: e.target.value });
-        setEndDateError(isValidDate(value) ? '' : 'Invalid date format. Use YYYY-MM-DD');
-    };
-
-
-    const handleStartHourChange = (e) => {
-        const value = e.target.value;
-        form.setFieldsValue({ startHour: e.target.value });
-
-        setStartHourError(isValidHour(value) ? '' : 'Hour must be between 0 and 23 and cannot start with 0');
-    };
-
-    const handleEndHourChange = (e) => {
-        const value = e.target.value;
-        form.setFieldsValue({ endHour: e.target.value });
-
-        setEndHourError(isValidHour(value) ? '' : 'Hour must be between 0 and 23 and cannot start with 0');
-    };
-
-    const handleWidthChange = (e) => {
-        const value = e.target.value;
-        form.setFieldsValue({ width: e.target.value });
-
-        setWidthError(/^\d+$/.test(value) ? '' : 'Only numbers are allowed!');
-    };
-
-    const handleLengthChange = (e) => {
-        const value = e.target.value;
-        form.setFieldsValue({ length: e.target.value });
-
-        setLengthError(/^\d+$/.test(value) ? '' : 'Only numbers are allowed!');
-    };
-
-    const handleLeftChange = (e) => {
-        const value = e.target.value;
-        form.setFieldsValue({ left: e.target.value });
-
-        setLeftError(/^\d+$/.test(value) ? '' : 'Only numbers are allowed!');
-    };
-
-    const handleTopChange = (e) => {
-        const value = e.target.value;
-        form.setFieldsValue({ top: e.target.value });
-
-        setTopError(/^\d+$/.test(value) ? '' : 'Only numbers are allowed!');
     };
 
     return (
@@ -553,7 +505,6 @@ const Popup = () => {
                             },
                         ]}>
                             <Radio.Group
-                                initialValue={true}
                                 buttonStyle='solid'>
                                 <Radio.Button
                                     key='true'
@@ -581,8 +532,6 @@ const Popup = () => {
                         <Form.Item
                             label='Start Date'
                             name='startDate'
-                            validateStatus={startDateError ? 'error' : ''}
-                            help={startDateError}
                             rules={[
                                 {
                                     required: true,
@@ -590,13 +539,11 @@ const Popup = () => {
                                 },
                                 dateValidationRule,
                             ]}>
-                            <Input placeholder='YYYY-MM-DD' style={{width: 150}} onChange={handleStartDateChange} />
+                            <Input placeholder='YYYY-MM-DD' maxLength={10} style={{width: 150}} />
                         </Form.Item>
                         <Form.Item
                             label='Start Hour'
                             name='startHour'
-                            validateStatus={startHourError ? 'error' : ''}
-                            help={startHourError}
                             rules={[
                                 {
                                     required: true,
@@ -604,13 +551,11 @@ const Popup = () => {
                                 },
                                 hourValidationRule,
                             ]}>
-                            <Input placeholder='0 ~ 23' maxLength={2} style={{width: 80}}onChange={handleStartHourChange} />:00:00
+                            <Input placeholder='0 ~ 23' maxLength={2} style={{ width: 80 }} />
                         </Form.Item>
                         <Form.Item
                             label='End Date'
                             name='endDate'
-                            validateStatus={endDateError ? 'error' : ''}
-                            help={endDateError}
                             rules={[
                                 {
                                     required: true,
@@ -618,13 +563,11 @@ const Popup = () => {
                                 },
                                 dateValidationRule,
                             ]}>
-                            <Input placeholder='YYYY-MM-DD' style={{width: 150}} onChange={handleEndDateChange} />
+                            <Input placeholder='YYYY-MM-DD' maxLength={10} style={{width: 150}} />
                         </Form.Item>
                         <Form.Item
                             label='End Hour'
                             name='endHour'
-                            validateStatus={endHourError ? 'error' : ''}
-                            help={endHourError}
                             rules={[
                                 {
                                     required: true,
@@ -632,7 +575,7 @@ const Popup = () => {
                                 },
                                 hourValidationRule,
                             ]}>
-                            <Input placeholder='0 ~ 23' maxLength={2} style={{width: 80}} onChange={handleEndHourChange} />:00:00
+                            <Input placeholder='0 ~ 23' maxLength={2} style={{ width: 80 }} />
                         </Form.Item>
                         <Form.Item label='Type' name='type'
                             rules={[
@@ -659,8 +602,6 @@ const Popup = () => {
                         <Form.Item
                             label='Popup Width'
                             name='width'
-                            validateStatus={widthError ? 'error' : ''}
-                            help={widthError}
                             rules={[
                                 {
                                     required: true,
@@ -668,13 +609,11 @@ const Popup = () => {
                                 },
                                 { pattern: /^\d+$/, message: 'Only numbers are allowed!' }
                             ]}>
-                            <Input style={{width: 100}} onChange={handleWidthChange} />px
+                            <Input placeholder="(px)" style={{width: 100}} />             
                         </Form.Item>
                         <Form.Item
                             label='Popup Height'
                             name='length'
-                            validateStatus={lengthError ? 'error' : ''}
-                            help={lengthError}
                             rules={[
                                 {
                                     required: true,
@@ -682,13 +621,11 @@ const Popup = () => {
                                 },
                                 { pattern: /^\d+$/, message: 'Only numbers are allowed!' }
                             ]}>
-                            <Input style={{width: 100}} onChange={handleLengthChange} />px
+                            <Input placeholder="(px)" style={{width: 100}} />
                         </Form.Item>
                         <Form.Item
                             label='Location (x)'
                             name='left'
-                            validateStatus={leftError ? 'error' : ''}
-                            help={leftError}
                             rules={[
                                 {
                                     required: true,
@@ -696,13 +633,11 @@ const Popup = () => {
                                 },
                                 { pattern: /^\d+$/, message: 'Only numbers are allowed!' }
                             ]}>
-                            <Input style={{width: 150}} onChange={handleLeftChange} />px
+                            <Input placeholder="(px)" style={{width: 100}} />
                         </Form.Item>
                         <Form.Item
                             label='Location (y)'
                             name='top'
-                            validateStatus={topError ? 'error' : ''}
-                            help={topError}
                             rules={[
                                 {
                                     required: true,
@@ -710,17 +645,17 @@ const Popup = () => {
                                 },
                                 { pattern: /^\d+$/, message: 'Only numbers are allowed!' }
                             ]}>
-                            <Input style={{width: 150}} onChange={handleTopChange} />px
+                            <Input  style={{width: 100}} />
                         </Form.Item>
-                        <Form.Item
-                            label="Popup Image"
-                           
-                        >
-                             <input
-                                type='file'
-                                id='file'
-                                onChange={handleFileChange}
-                            />
+                        <Form.Item label="Popup Image">
+                            <div>
+                                <input
+                                    type='file'
+                                    id='file'
+                                    onChange={handleFileChange}
+                                />
+                                <span>(jpg, png only)</span>
+                            </div>
                         </Form.Item>
                         <Form.Item label='Close Button Status' name='closeButtonStatus'
                             rules={[
@@ -778,10 +713,7 @@ const Popup = () => {
                     </>
                 ) : (
                     <>
-                        <Form.Item label='ID' style={{ margin: "0" }}>
-                            {modalInfo.id}
-                        </Form.Item>
-                        <Form.Item label='Use Status' name='useStatus'
+                      <Form.Item label='Use Status' name='useStatus'
                             rules={[
                             {
                                 required: true,
@@ -789,7 +721,6 @@ const Popup = () => {
                             },
                         ]}>
                             <Radio.Group
-                                initialValue={modalInfo?.useStatus}
                                 buttonStyle='solid'>
                                 <Radio.Button
                                     key='true'
@@ -817,8 +748,6 @@ const Popup = () => {
                         <Form.Item
                             label='Start Date'
                             name='startDate'
-                            validateStatus={startDateError ? 'error' : ''}
-                            help={startDateError}
                             rules={[
                                 {
                                     required: true,
@@ -826,13 +755,11 @@ const Popup = () => {
                                 },
                                 dateValidationRule,
                             ]}>
-                            <Input placeholder='YYYY-MM-DD' style={{width: 150}} onChange={handleStartDateChange} />
+                            <Input placeholder='YYYY-MM-DD' maxLength={10} style={{width: 150}} />
                         </Form.Item>
                         <Form.Item
                             label='Start Hour'
                             name='startHour'
-                            validateStatus={startHourError ? 'error' : ''}
-                            help={startHourError}
                             rules={[
                                 {
                                     required: true,
@@ -840,13 +767,11 @@ const Popup = () => {
                                 },
                                 hourValidationRule,
                             ]}>
-                            <Input placeholder='0 ~ 23' maxLength={2} style={{width: 80}}onChange={handleStartHourChange} />:00:00
+                            <Input placeholder='0 ~ 23' maxLength={2} style={{ width: 80 }} />
                         </Form.Item>
                         <Form.Item
                             label='End Date'
                             name='endDate'
-                            validateStatus={endDateError ? 'error' : ''}
-                            help={endDateError}
                             rules={[
                                 {
                                     required: true,
@@ -854,13 +779,11 @@ const Popup = () => {
                                 },
                                 dateValidationRule,
                             ]}>
-                            <Input placeholder='YYYY-MM-DD' style={{width: 150}} onChange={handleEndDateChange} />
+                            <Input placeholder='YYYY-MM-DD' maxLength={10} style={{width: 150}} />
                         </Form.Item>
                         <Form.Item
                             label='End Hour'
                             name='endHour'
-                            validateStatus={endHourError ? 'error' : ''}
-                            help={endHourError}
                             rules={[
                                 {
                                     required: true,
@@ -868,7 +791,7 @@ const Popup = () => {
                                 },
                                 hourValidationRule,
                             ]}>
-                            <Input placeholder='0 ~ 23' maxLength={2} style={{width: 80}} onChange={handleEndHourChange} />:00:00
+                            <Input placeholder='0 ~ 23' maxLength={2} style={{ width: 80 }} />
                         </Form.Item>
                         <Form.Item label='Type' name='type'
                             rules={[
@@ -895,8 +818,6 @@ const Popup = () => {
                         <Form.Item
                             label='Popup Width'
                             name='width'
-                            validateStatus={widthError ? 'error' : ''}
-                            help={widthError}
                             rules={[
                                 {
                                     required: true,
@@ -904,13 +825,11 @@ const Popup = () => {
                                 },
                                 { pattern: /^\d+$/, message: 'Only numbers are allowed!' }
                             ]}>
-                            <Input style={{width: 100}} onChange={handleWidthChange} />px
+                            <Input placeholder="(px)" style={{width: 100}} />             
                         </Form.Item>
                         <Form.Item
                             label='Popup Height'
                             name='length'
-                            validateStatus={lengthError ? 'error' : ''}
-                            help={lengthError}
                             rules={[
                                 {
                                     required: true,
@@ -918,13 +837,11 @@ const Popup = () => {
                                 },
                                 { pattern: /^\d+$/, message: 'Only numbers are allowed!' }
                             ]}>
-                            <Input style={{width: 100}} onChange={handleLengthChange} />px
+                            <Input placeholder="(px)" style={{width: 100}} />
                         </Form.Item>
                         <Form.Item
                             label='Location (x)'
                             name='left'
-                            validateStatus={leftError ? 'error' : ''}
-                            help={leftError}
                             rules={[
                                 {
                                     required: true,
@@ -932,13 +849,11 @@ const Popup = () => {
                                 },
                                 { pattern: /^\d+$/, message: 'Only numbers are allowed!' }
                             ]}>
-                            <Input style={{width: 150}} onChange={handleLeftChange} />px
+                            <Input placeholder="(px)" style={{width: 100}} />
                         </Form.Item>
                         <Form.Item
                             label='Location (y)'
                             name='top'
-                            validateStatus={topError ? 'error' : ''}
-                            help={topError}
                             rules={[
                                 {
                                     required: true,
@@ -946,18 +861,20 @@ const Popup = () => {
                                 },
                                 { pattern: /^\d+$/, message: 'Only numbers are allowed!' }
                             ]}>
-                            <Input style={{width: 150}} onChange={handleTopChange} />px
+                            <Input  style={{width: 100}} />
                         </Form.Item>
-                        <Form.Item
-                            label="Popup Image"
-                           
-                        >
-                             <input
-                                type='file'
-                                id='file'
-                                onChange={handleFileChange}
-                            />
+                        <Form.Item label="Popup Image">
+                            <div>
+                                <input
+                                    type='file'
+                                    id='file'
+                                    onChange={handleFileChange}
+                                />
+                                <span>(jpg, png only)</span>
+                            </div>
+                            * Current Image will be replaced with New Image after [Edit]
                         </Form.Item>
+
                         <Form.Item label='Close Button Status' name='closeButtonStatus'
                             rules={[
                             {
@@ -991,8 +908,6 @@ const Popup = () => {
                             ]}>
                             <Input />
                         </Form.Item>
-
-
                         <p
                             style={{
                                 display: "flex",
