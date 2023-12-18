@@ -173,11 +173,29 @@ const Ci = () => {
   };
 
   const handlePngFileChange = (event) => {
-    setPngFile(event.target.files[0]);
+    const file = event.target.files[0];
+      if (file) {
+          const allowedExtensions = /(\.png)$/i;
+          if (!allowedExtensions.exec(file.name)) {
+            alert('Invalid file type. Only PNG files are allowed.');
+            event.target.value = '';
+            return;
+          }
+          setPngFile(event.target.files[0]);
+        }
   };
   
   const handleAiFileChange = (event) => {
-    setAiFile(event.target.files[0]);
+    const file = event.target.files[0];
+    if (file) {
+      const allowedExtensions = /(\.ai)$/i;
+      if (!allowedExtensions.exec(file.name)) {
+        alert('Invalid file type. Only AI files are allowed.');
+        event.target.value = '';
+        return;
+      }
+      setAiFile(event.target.files[0]);
+    }
   };
 
   return (
@@ -308,6 +326,7 @@ const Ci = () => {
 
               <Form.Item label="New AI Image">
                 <input type="file" id="file" onChange={handleAiFileChange} />
+                <span>(ai extension only)</span>
                 <p>
                   *Current Image will be replaced with New Image after [Edit]
                 </p>
@@ -322,6 +341,7 @@ const Ci = () => {
 
               <Form.Item label="New PNG Image">
                 <input type="file" id="file" onChange={handlePngFileChange} />
+                <span>(png extension only)</span>
                 <p>
                   *Current Image will be replaced with New Image after [Edit]
                 </p>

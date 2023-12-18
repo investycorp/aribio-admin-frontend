@@ -218,6 +218,7 @@ const Career = () => {
           popupContents,
           url,
         };
+
         if (selectedFile) {
           edit.popupFile = selectedFile;
         } else {
@@ -256,7 +257,7 @@ const Career = () => {
     setIsModalOpen(false);
     setSelectedFile();
     setModalFor("");
-    setNewJobGroup(null);
+    setNewJobGroup("");
   };
 
   const handleFileChange = (event) => {
@@ -376,7 +377,7 @@ const Career = () => {
                       } catch (error) {
                         console.log(error);
                       } finally {
-                        setNewJobGroup(null);
+                        setNewJobGroup("");
                       }
                     }}
                   >
@@ -447,7 +448,6 @@ const Career = () => {
               <Form.Item
                 label="Location"
                 name="location"
-                mode="tags"
                 rules={[
                   {
                     required: true,
@@ -456,14 +456,7 @@ const Career = () => {
                 ]}
                 style={{ marginTop: "30px" }}
               >
-                <Select
-                  defaultValue={modalInfo.location}
-                  style={{ width: 150 }}
-                  options={[
-                    { value: "KOREA", label: "KOREA" },
-                    { value: "GLOBAL", label: "GLOBAL" },
-                  ]}
-                />
+                <Input width={100} />
               </Form.Item>
               <Form.Item
                 label="Job Title"

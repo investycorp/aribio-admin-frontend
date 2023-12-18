@@ -20,6 +20,7 @@ import useCareerList from "../api/career/useCareerList";
 import useJobGroupList from "../api/career/jobGroup/useJobGroupList";
 import useAdvisorList from "../api/aboutus/advisor/useAdvisorList";
 import useLeadershipList from "../api/aboutus/leadership/useLeadershipList";
+import usePopupList from "../api/popup/usePopupList";
 
 function Sidebar({ pageName }) {
   const [language, setLanguage] = useRecoilState(Language);
@@ -27,6 +28,7 @@ function Sidebar({ pageName }) {
   const navigate = useNavigate();
   const [current, setCurrent] = React.useState(location.pathname.split("/")[1]);
   const { refetch: refetchCi } = useCiList();
+  const { refetch: refetchPopup } = usePopupList();
   const { refetch: refetchPipeline } = usePipelineList();
   const { refetch: refetchPublication } = usePublicationList();
   const { refetch: refetchLink } = useLinkList();
@@ -166,6 +168,7 @@ function Sidebar({ pageName }) {
     await refetchJobGroup();
     await refetchAdvisor();
     await refetchLeadership();
+    await refetchPopup();
   };
 
   const onLanguageChange = async () => {

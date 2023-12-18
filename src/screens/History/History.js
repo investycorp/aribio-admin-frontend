@@ -191,12 +191,10 @@ const History = () => {
         await form
             .validateFields()
             .then(async (values) => {
-                const { year, month, day, contents, historyTypeId } =
+                const { date, contents, historyTypeId } =
                     await values;
                 const edit = await {
-                    year,
-                    month,
-                    day,
+                    date,
                     contents,
                     historyTypeId,
                 };

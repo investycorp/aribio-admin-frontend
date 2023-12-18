@@ -16,6 +16,7 @@ const useEditHistoryType = () => {
 		{
 			onSuccess: () => {
 				queryClient.invalidateQueries("historyTypeList");
+				queryClient.invalidateQueries("historyList");
 				console.log("success:", data);
 			},
 		}

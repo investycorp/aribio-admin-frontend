@@ -19,6 +19,9 @@ const useAddJobGroup = () => {
                 queryClient.invalidateQueries("jobGroupList");
                 console.log("success:", data);
             },
+            onError: () => {
+                alert('Duplicate value exists');
+            }
         }
     );
 

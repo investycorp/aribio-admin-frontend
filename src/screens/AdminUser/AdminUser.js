@@ -585,10 +585,10 @@ const AdminUser = () => {
                                     alignItems: "center",
                                 }}>
                                 <Button
-                                    disabled={
+                                    disabled={changePassword ? (
                                         !newPassword ||
                                         !passwordConfirm ||
-                                        !passwordMatch
+                                        !passwordMatch) : false
                                     }
                                     type='primary'
                                     onClick={(event) => {

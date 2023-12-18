@@ -21,8 +21,6 @@ const Popup = () => {
 
     const [isFormValid, setIsFormValid] = useState(false);
 	const [filteredList, setFilteredList] = useState([]);
-
-
     const { data, isLoading } = usePopupList();
     const { mutate, isSuccess } = useAddPopup();
     const { mutate: mutateEdit, isSuccess: isSuccessEdit } = useEditPopup();
@@ -186,15 +184,18 @@ const Popup = () => {
                     <Button
                         danger
                         onClick={(event) => {
+                            if (isModalOpen) return;
                             event.stopPropagation();
 
                             Modal.confirm({
                                 title: "Are you sure to delete this user?",
 
                                 onOk() {
+                                    setIsModalOpen(false);
                                     handleDelete(record.id);
                                 },
                                 onCancel() {
+                                    setIsModalOpen(false);
                                     handleCancel();
                                 },
                                 okText: "Delete",
@@ -645,9 +646,21 @@ const Popup = () => {
                                 },
                                 { pattern: /^\d+$/, message: 'Only numbers are allowed!' }
                             ]}>
-                            <Input  style={{width: 100}} />
+                            <Input placeholder="(px)" style={{width: 100}} />
                         </Form.Item>
-                        <Form.Item label="Popup Image">
+                        <Form.Item
+                            label={
+                                <>
+                                    <span style={{color: '#ff4d4f', fontSize: 14}}>* </span>
+                                    <span>Image File</span>
+                                </>
+                            }
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Required field",
+                                }]}
+                        >
                             <div>
                                 <input
                                     type='file'
@@ -657,7 +670,9 @@ const Popup = () => {
                                 <span>(jpg, png only)</span>
                             </div>
                         </Form.Item>
-                        <Form.Item label='Close Button Status' name='closeButtonStatus'
+                        <Form.Item 
+                            label='Close Button Status'
+                            name='closeButtonStatus'
                             rules={[
                             {
                                 required: true,
@@ -701,7 +716,7 @@ const Popup = () => {
                             }}>
                             <Button
                                 type='primary'
-                                disabled={!isFormValid}
+                                disabled={!isFormValid || !selectedFile}
                                 onClick={(event) => {
                                     event.stopPropagation();
                                     handleAdd();
@@ -861,7 +876,10 @@ const Popup = () => {
                                 },
                                 { pattern: /^\d+$/, message: 'Only numbers are allowed!' }
                             ]}>
-                            <Input  style={{width: 100}} />
+                            <Input placeholder="(px)" style={{width: 100}} />
+                        </Form.Item>
+                        <Form.Item>
+                            <Image src={modalInfo.fileUrl} width={250}/>
                         </Form.Item>
                         <Form.Item label="Popup Image">
                             <div>
