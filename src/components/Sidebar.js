@@ -53,6 +53,20 @@ function Sidebar({ pageName }) {
       key: "popup",
     },
     {
+      label: "About Us",
+      key: "aboutus",
+      children: [
+        {
+          label: "Leadership",
+          key: "leadership",
+        },
+        {
+          label: "Advisor",
+          key: "advisor",
+        },
+      ],
+    },
+    {
       label: "History",
       key: "history",
     },
@@ -93,20 +107,6 @@ function Sidebar({ pageName }) {
         {
           label: "Contact Us",
           key: "contactUs",
-        },
-      ],
-    },
-    {
-      label: "About Us",
-      key: "aboutus",
-      children: [
-        {
-          label: "Leadership",
-          key: "leadership",
-        },
-        {
-          label: "Advisor",
-          key: "advisor",
         },
       ],
     },
