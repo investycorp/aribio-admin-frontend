@@ -8,7 +8,11 @@ const useAddPopup = () => {
 	const postPopup = async (formData) => {
 		formData.language = lan;
 		console.log("formData", formData);
-		const { data } = await axios.post(`/admin/main/pop-up`, formData);
+		const { data } = await axios.post(`/admin/main/pop-up`, formData, {
+			headers: {
+				"Content-Type": "multipart/form-data",
+			},
+		});
 		return data;
 	};
 
@@ -19,6 +23,9 @@ const useAddPopup = () => {
 				queryClient.invalidateQueries("popupList");
 				console.log("success:", data);
 			},
+			onError: error => {
+				console.log(error.response);
+			}
 		}
 	);
 

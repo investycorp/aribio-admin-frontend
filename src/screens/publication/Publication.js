@@ -107,7 +107,7 @@ const Publication = () => {
                             setSelectedFile();
                             let editData = {
                                 id: record.id,
-                                date: `${record.year}-${record.month}-${record.day}`,
+                                date: record.date,
                                 type: record.type,
                                 journal: record.journal,
                                 title: record.title,
@@ -455,8 +455,10 @@ const Publication = () => {
                                     required: true,
                                     message: "Required field",
                                 },
+                                dateValidationRule
                             ]}>
                                 <Input
+                                    initialValue={modalInfo?.date}
                                     style={{ width: "130px" }}
                                     placeholder='YYYY-MM-DD'
                                 />

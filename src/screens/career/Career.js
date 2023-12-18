@@ -36,7 +36,7 @@ const Career = () => {
   const [modalInfo, setModalInfo] = useState({});
   const [modalFor, setModalFor] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
-  const [newJobGroup, setNewJobGroup] = useState(null);
+  const [newJobGroup, setNewJobGroup] = useState('');
 
   const { data, isLoading, refetch } = useCareerList();
   const { mutate, isSuccess } = useAddCareer();
@@ -367,6 +367,7 @@ const Career = () => {
                     style={{ width: "300px" }}
                   />
                   <Button
+                    disabled={newJobGroup.trim().length === 0}
                     onClick={async () => {
                       try {
                         mutateJobGroup({

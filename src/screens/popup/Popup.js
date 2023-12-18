@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Layout, Table, Input, Form, Modal, Radio } from "antd";
+import { Button, Layout, Table, Input, Form, Modal, Radio, Upload } from "antd";
 import { Wrap } from "../../components/style";
 import Sidebar from "../../components/Sidebar";
 import { useNavigate } from "react-router-dom";
@@ -16,9 +16,24 @@ const Popup = () => {
 	const [modalInfo, setModalInfo] = useState({});
 	const [modalFor, setModalFor] = useState("");
     const [searchValue, setSearchValue] = useState("");
+    const [selectedFile, setSelectedFile] = useState(null);
+
+
     const [isFormValid, setIsFormValid] = useState(false);
-    
+
+    const [widthError, setWidthError] = useState('');
+    const [lengthError, setLengthError] = useState('');
+    const [leftError, setLeftError] = useState('');
+    const [topError, setTopError] = useState('');
+
+    const [startDateError, setStartDateError] = useState('');
+    const [endDateError, setEndDateError] = useState('');
+    const [startHourError, setStartHourError] = useState('');
+    const [endHourError, setEndHourError] = useState('');
+
 	const [filteredList, setFilteredList] = useState([]);
+
+
     const { data, isLoading } = usePopupList();
     const { mutate, isSuccess } = useAddPopup();
     const { mutate: mutateEdit, isSuccess: isSuccessEdit } = useEditPopup();
@@ -94,7 +109,7 @@ const Popup = () => {
             render: (event, record) => {
                 return (
                     <span>
-                        {record.startYear}/{record.startMonth}/{record.startDay} {record.startHour}:00:00
+                        {record.startDate} {record.startHour}:00:00
                     </span>
                 );
             }
@@ -106,7 +121,7 @@ const Popup = () => {
             render: (event, record) => {
                 return (
                     <span>
-                        {record.endYear}/{record.endMonth}/{record.endDay} {record.endHour}:00:00
+                        {record.endDate} {record.endHour}:00:00
                     </span>
                 );
             }
@@ -148,12 +163,26 @@ const Popup = () => {
                     <Button
                         style={{ marginRight: "10px" }}
                         onClick={async (event) => {
+                            setModalFor("edit");
+                            console.log(record);
                             event.stopPropagation();
                             let editData = {
                                 id: record.id,
-                                date: record.date,
-                                historyTypeId: record.historyTypeId,
-                                contents: record.contents,
+                                title: record.title,
+                                fileUrl: record.fileDto.fileUrl,
+                                fileId: record.fileDto.fileId,
+                                startDate: record.startDate,
+                                startHour: record.startHour.toString(),
+                                endDate: record.endDate,
+                                endHour: record.endHour.toString(),
+                                useStatus: record.useStatus,
+                                closeButtonStatus: record.closeButtonStatus,
+                                width: record.width,
+                                length: record.length,
+                                top: record.topSide,
+                                left: record.leftSide,
+                                link: record.link,
+                                type: record.type,
                             };
                             await setModalInfo(editData);
                             form.setFieldsValue(editData);
@@ -204,13 +233,37 @@ const Popup = () => {
         await form
             .validateFields()
             .then(async (values) => {
-                const { date, contents, historyTypeId } = await values;
-
+                const { 
+                    title,
+                    startDate,
+                    startHour,
+                    endDate,
+                    endHour,
+                    useStatus,
+                    closeButtonStatus,
+                    width,
+                    length,
+                    top,
+                    left,
+                    link,
+                    type,
+                } = await values;
                 try {
                     mutate({
-                        date,
-                        contents,
-                        historyTypeId,
+                        title,
+                        file: selectedFile,
+                        startDate,
+                        startHour,
+                        endDate,
+                        endHour,
+                        useStatus,
+                        closeButtonStatus,
+                        width,
+                        length,
+                        top,
+                        left,
+                        link,
+                        type,
                     });
                 } catch (error) {
                     console.log(error);
@@ -221,6 +274,7 @@ const Popup = () => {
                 }
             })
             .catch((error) => {
+                console.log(error.values, error.errorFields.toString());
                 window.alert("Please fill out all the required fields");
             });
     };
@@ -229,18 +283,41 @@ const Popup = () => {
         await form
             .validateFields()
             .then(async (values) => {
-                const { year, month, day, contents, historyTypeId } =
-                    await values;
-                const edit = await {
-                    year,
-                    month,
-                    day,
-                    contents,
-                    historyTypeId,
+                const { 
+                    title,
+                    date,
+                    startDate,
+                    startHour,
+                    endDate,
+                    endHour,
+                    useStatus,
+                    closeButtonStatus,
+                    width,
+                    length,
+                    top,
+                    left,
+                    link,
+                    type,
+                } = await values;
+
+                const edit = {
+                    title,
+                    date,
+                    startDate,
+                    startHour,
+                    endDate,
+                    endHour,
+                    useStatus,
+                    closeButtonStatus,
+                    width,
+                    length,
+                    top,
+                    left,
+                    link,
+                    type,
                 };
 
                 try {
-                    console.log("edit: ", edit);
                     mutateEdit({ id, edit });
                 } catch (error) {
                     console.log(error);
@@ -269,26 +346,20 @@ const Popup = () => {
         form.resetFields();
         setModalInfo({});
         setIsModalOpen(false);
+        setSelectedFile(null);
         setModalFor("");
     };
 
     const onSearch = (value) => {
         setSearchValue(value);
         let filteredData = data?.data?.dataList.filter((item) => {
-            // 검색어를 소문자로 변환합니다.
             const lowerCaseValue = value.toLowerCase();
-    
-            // 객체의 각 키와 값을 검사합니다.
             return Object.keys(item).some(key => {
                 const val = item[key];
-    
-                // 객체의 값이 문자열이나 숫자일 경우에만 검사합니다.
                 if (typeof val === 'string' || typeof val === 'number') {
-                    // 객체의 값도 소문자로 변환하여 포함 여부를 확인합니다.
                     return val.toString().toLowerCase().includes(lowerCaseValue);
                 }
     
-                // 객체의 값이 객체인 경우, 이를 재귀적으로 검사합니다.
                 if (typeof val === 'object' && val !== null) {
                     return Object.keys(val).some(subKey => {
                         const subVal = val[subKey];
@@ -300,6 +371,11 @@ const Popup = () => {
             });
         });
         setFilteredList(filteredData);
+    };
+
+    const handleFileChange = (event) => {
+        setSelectedFile(event.target.files[0]);
+        form.setFieldValue("fileUrl", "");
     };
 
     const handleFieldsChange = (_, allFields) => {
@@ -330,6 +406,75 @@ const Popup = () => {
             }
             return Promise.reject(new Error('Invalid date format. Use YYYY-MM-DD'));
         },
+    };
+
+    const isValidHour = (value) => {
+        return /^(?:[0-9]|1[0-9]|2[0-3])$/.test(value);
+    };
+    
+    const hourValidationRule = {
+        validator: (_, value) => {
+        const hour = parseInt(value, 10);
+        if (!isNaN(hour) && isValidHour(value)) {
+            return Promise.resolve();
+        }
+        return Promise.reject(new Error('The value must be a number between 0 and 23'));
+    }
+    };
+
+    const handleStartDateChange = (e) => {
+        const value = e.target.value;
+        form.setFieldsValue({ startDate: e.target.value });
+        setStartDateError(isValidDate(value) ? '' : 'Invalid date format. Use YYYY-MM-DD');
+    };
+
+    const handleEndDateChange = (e) => {
+        const value = e.target.value;
+        form.setFieldsValue({ endDate: e.target.value });
+        setEndDateError(isValidDate(value) ? '' : 'Invalid date format. Use YYYY-MM-DD');
+    };
+
+
+    const handleStartHourChange = (e) => {
+        const value = e.target.value;
+        form.setFieldsValue({ startHour: e.target.value });
+
+        setStartHourError(isValidHour(value) ? '' : 'Hour must be between 0 and 23 and cannot start with 0');
+    };
+
+    const handleEndHourChange = (e) => {
+        const value = e.target.value;
+        form.setFieldsValue({ endHour: e.target.value });
+
+        setEndHourError(isValidHour(value) ? '' : 'Hour must be between 0 and 23 and cannot start with 0');
+    };
+
+    const handleWidthChange = (e) => {
+        const value = e.target.value;
+        form.setFieldsValue({ width: e.target.value });
+
+        setWidthError(/^\d+$/.test(value) ? '' : 'Only numbers are allowed!');
+    };
+
+    const handleLengthChange = (e) => {
+        const value = e.target.value;
+        form.setFieldsValue({ length: e.target.value });
+
+        setLengthError(/^\d+$/.test(value) ? '' : 'Only numbers are allowed!');
+    };
+
+    const handleLeftChange = (e) => {
+        const value = e.target.value;
+        form.setFieldsValue({ left: e.target.value });
+
+        setLeftError(/^\d+$/.test(value) ? '' : 'Only numbers are allowed!');
+    };
+
+    const handleTopChange = (e) => {
+        const value = e.target.value;
+        form.setFieldsValue({ top: e.target.value });
+
+        setTopError(/^\d+$/.test(value) ? '' : 'Only numbers are allowed!');
     };
 
     return (
@@ -400,59 +545,208 @@ const Popup = () => {
                 autoComplete='off'>
                 {modalFor === "add" ? (
                     <>
+                      <Form.Item label='Use Status' name='useStatus'
+                            rules={[
+                            {
+                                required: true,
+                                message: "Required field",
+                            },
+                        ]}>
+                            <Radio.Group
+                                initialValue={true}
+                                buttonStyle='solid'>
+                                <Radio.Button
+                                    key='true'
+                                    value='true'>
+                                    YES
+                                </Radio.Button>
+                                <Radio.Button
+                                    key='false'
+                                    value='false'>
+                                    NO
+                                </Radio.Button>
+                            </Radio.Group>
+                        </Form.Item>
                         <Form.Item
-                            label='Start Date'
-                            name='startDate'
+                            label='Title'
+                            name='title'
                             rules={[
                                 {
                                     required: true,
                                     message: "Required field",
                                 },
-                                dateValidationRule
                             ]}>
-                            <Input placeholder='YYYY-MM-DD' style={{width: 150}} />
+                            <Input />
+                        </Form.Item>
+                        <Form.Item
+                            label='Start Date'
+                            name='startDate'
+                            validateStatus={startDateError ? 'error' : ''}
+                            help={startDateError}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Required field",
+                                },
+                                dateValidationRule,
+                            ]}>
+                            <Input placeholder='YYYY-MM-DD' style={{width: 150}} onChange={handleStartDateChange} />
+                        </Form.Item>
+                        <Form.Item
+                            label='Start Hour'
+                            name='startHour'
+                            validateStatus={startHourError ? 'error' : ''}
+                            help={startHourError}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Required field",
+                                },
+                                hourValidationRule,
+                            ]}>
+                            <Input placeholder='0 ~ 23' maxLength={2} style={{width: 80}}onChange={handleStartHourChange} />:00:00
                         </Form.Item>
                         <Form.Item
                             label='End Date'
                             name='endDate'
+                            validateStatus={endDateError ? 'error' : ''}
+                            help={endDateError}
                             rules={[
                                 {
                                     required: true,
                                     message: "Required field",
                                 },
-                                dateValidationRule
+                                dateValidationRule,
                             ]}>
-                            <Input placeholder='YYYY-MM-DD' style={{width: 150}} />
+                            <Input placeholder='YYYY-MM-DD' style={{width: 150}} onChange={handleEndDateChange} />
                         </Form.Item>
                         <Form.Item
-                            label='Type'
-                            name='type'
+                            label='End Hour'
+                            name='endHour'
+                            validateStatus={endHourError ? 'error' : ''}
+                            help={endHourError}
                             rules={[
                                 {
                                     required: true,
                                     message: "Required field",
                                 },
+                                hourValidationRule,
                             ]}>
+                            <Input placeholder='0 ~ 23' maxLength={2} style={{width: 80}} onChange={handleEndHourChange} />:00:00
+                        </Form.Item>
+                        <Form.Item label='Type' name='type'
+                            rules={[
+                            {
+                                required: true,
+                                message: "Required field",
+                            },
+                        ]}>
                             <Radio.Group
-                                initialValue={modalInfo?.historyTypeId}
+                                initialValue={modalInfo?.type}
                                 buttonStyle='solid'>
-                                {/* {typeData?.data?.dataList.map((item) => {
-                                    if (item.id) {
-                                        return (
-                                            <Radio.Button
-                                                key={item.id}
-                                                value={item.id}>
-                                                {item.startYear} ~{" "}
-                                                {item.endYear}
-                                            </Radio.Button>
-                                        );
-                                    }
-                                })} */}
+                                <Radio.Button
+                                    key='mobile'
+                                    value='MOBILE'>
+                                    MOBILE
+                                </Radio.Button>
+                                <Radio.Button
+                                    key='pc'
+                                    value='PC'>
+                                    PC
+                                </Radio.Button>
                             </Radio.Group>
                         </Form.Item>
                         <Form.Item
-                            label='Contents'
-                            name='contents'
+                            label='Popup Width'
+                            name='width'
+                            validateStatus={widthError ? 'error' : ''}
+                            help={widthError}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Required field",
+                                },
+                                { pattern: /^\d+$/, message: 'Only numbers are allowed!' }
+                            ]}>
+                            <Input style={{width: 100}} onChange={handleWidthChange} />px
+                        </Form.Item>
+                        <Form.Item
+                            label='Popup Height'
+                            name='length'
+                            validateStatus={lengthError ? 'error' : ''}
+                            help={lengthError}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Required field",
+                                },
+                                { pattern: /^\d+$/, message: 'Only numbers are allowed!' }
+                            ]}>
+                            <Input style={{width: 100}} onChange={handleLengthChange} />px
+                        </Form.Item>
+                        <Form.Item
+                            label='Location (x)'
+                            name='left'
+                            validateStatus={leftError ? 'error' : ''}
+                            help={leftError}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Required field",
+                                },
+                                { pattern: /^\d+$/, message: 'Only numbers are allowed!' }
+                            ]}>
+                            <Input style={{width: 150}} onChange={handleLeftChange} />px
+                        </Form.Item>
+                        <Form.Item
+                            label='Location (y)'
+                            name='top'
+                            validateStatus={topError ? 'error' : ''}
+                            help={topError}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Required field",
+                                },
+                                { pattern: /^\d+$/, message: 'Only numbers are allowed!' }
+                            ]}>
+                            <Input style={{width: 150}} onChange={handleTopChange} />px
+                        </Form.Item>
+                        <Form.Item
+                            label="Popup Image"
+                           
+                        >
+                             <input
+                                type='file'
+                                id='file'
+                                onChange={handleFileChange}
+                            />
+                        </Form.Item>
+                        <Form.Item label='Close Button Status' name='closeButtonStatus'
+                            rules={[
+                            {
+                                required: true,
+                                message: "Required field",
+                            },
+                        ]}>
+                            <Radio.Group
+                                initialValue={true}
+                                buttonStyle='solid'>
+                                <Radio.Button
+                                    key='true'
+                                    value='true'>
+                                    YES
+                                </Radio.Button>
+                                <Radio.Button
+                                    key='false'
+                                    value='false'>
+                                    NO
+                                </Radio.Button>
+                            </Radio.Group>
+                        </Form.Item>
+                        <Form.Item
+                            label='Link'
+                            name='link'
                             rules={[
                                 {
                                     required: true,
@@ -487,49 +781,31 @@ const Popup = () => {
                         <Form.Item label='ID' style={{ margin: "0" }}>
                             {modalInfo.id}
                         </Form.Item>
-                        <Form.Item
-                            label='Date'
-                            name='date'
+                        <Form.Item label='Use Status' name='useStatus'
                             rules={[
-                                {
-                                    required: true,
-                                    message: "Required field",
-                                },
-                                dateValidationRule,
-                            ]}>
-                            <Input placeholder="YYYY-MM-DD" style={{width: 150}} />
-                        </Form.Item>
-                        <Form.Item
-                            label='Category'
-                            name='historyTypeId'
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Required field",
-                                },
-                            ]}>
-                    
+                            {
+                                required: true,
+                                message: "Required field",
+                            },
+                        ]}>
                             <Radio.Group
-                                initialValue={modalInfo?.historyTypeId}
+                                initialValue={modalInfo?.useStatus}
                                 buttonStyle='solid'>
-                                {/* {typeData?.data?.dataList.map((item) => {
-                                    if (item.id) {
-                                        return (
-                                            <Radio.Button
-                                                key={item.id}
-                                                value={item.id}>
-                                                {item.startYear} ~{" "}
-                                                {item.endYear}
-                                            </Radio.Button>
-                                        );
-                                    }
-                                })} */}
+                                <Radio.Button
+                                    key='true'
+                                    value='true'>
+                                    YES
+                                </Radio.Button>
+                                <Radio.Button
+                                    key='false'
+                                    value='false'>
+                                    NO
+                                </Radio.Button>
                             </Radio.Group>
                         </Form.Item>
                         <Form.Item
-                            layout='vertical'
-                            label='Contents'
-                            name='contents'
+                            label='Title'
+                            name='title'
                             rules={[
                                 {
                                     required: true,
@@ -538,6 +814,184 @@ const Popup = () => {
                             ]}>
                             <Input />
                         </Form.Item>
+                        <Form.Item
+                            label='Start Date'
+                            name='startDate'
+                            validateStatus={startDateError ? 'error' : ''}
+                            help={startDateError}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Required field",
+                                },
+                                dateValidationRule,
+                            ]}>
+                            <Input placeholder='YYYY-MM-DD' style={{width: 150}} onChange={handleStartDateChange} />
+                        </Form.Item>
+                        <Form.Item
+                            label='Start Hour'
+                            name='startHour'
+                            validateStatus={startHourError ? 'error' : ''}
+                            help={startHourError}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Required field",
+                                },
+                                hourValidationRule,
+                            ]}>
+                            <Input placeholder='0 ~ 23' maxLength={2} style={{width: 80}}onChange={handleStartHourChange} />:00:00
+                        </Form.Item>
+                        <Form.Item
+                            label='End Date'
+                            name='endDate'
+                            validateStatus={endDateError ? 'error' : ''}
+                            help={endDateError}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Required field",
+                                },
+                                dateValidationRule,
+                            ]}>
+                            <Input placeholder='YYYY-MM-DD' style={{width: 150}} onChange={handleEndDateChange} />
+                        </Form.Item>
+                        <Form.Item
+                            label='End Hour'
+                            name='endHour'
+                            validateStatus={endHourError ? 'error' : ''}
+                            help={endHourError}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Required field",
+                                },
+                                hourValidationRule,
+                            ]}>
+                            <Input placeholder='0 ~ 23' maxLength={2} style={{width: 80}} onChange={handleEndHourChange} />:00:00
+                        </Form.Item>
+                        <Form.Item label='Type' name='type'
+                            rules={[
+                            {
+                                required: true,
+                                message: "Required field",
+                            },
+                        ]}>
+                            <Radio.Group
+                                initialValue={modalInfo?.type}
+                                buttonStyle='solid'>
+                                <Radio.Button
+                                    key='mobile'
+                                    value='MOBILE'>
+                                    MOBILE
+                                </Radio.Button>
+                                <Radio.Button
+                                    key='pc'
+                                    value='PC'>
+                                    PC
+                                </Radio.Button>
+                            </Radio.Group>
+                        </Form.Item>
+                        <Form.Item
+                            label='Popup Width'
+                            name='width'
+                            validateStatus={widthError ? 'error' : ''}
+                            help={widthError}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Required field",
+                                },
+                                { pattern: /^\d+$/, message: 'Only numbers are allowed!' }
+                            ]}>
+                            <Input style={{width: 100}} onChange={handleWidthChange} />px
+                        </Form.Item>
+                        <Form.Item
+                            label='Popup Height'
+                            name='length'
+                            validateStatus={lengthError ? 'error' : ''}
+                            help={lengthError}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Required field",
+                                },
+                                { pattern: /^\d+$/, message: 'Only numbers are allowed!' }
+                            ]}>
+                            <Input style={{width: 100}} onChange={handleLengthChange} />px
+                        </Form.Item>
+                        <Form.Item
+                            label='Location (x)'
+                            name='left'
+                            validateStatus={leftError ? 'error' : ''}
+                            help={leftError}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Required field",
+                                },
+                                { pattern: /^\d+$/, message: 'Only numbers are allowed!' }
+                            ]}>
+                            <Input style={{width: 150}} onChange={handleLeftChange} />px
+                        </Form.Item>
+                        <Form.Item
+                            label='Location (y)'
+                            name='top'
+                            validateStatus={topError ? 'error' : ''}
+                            help={topError}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Required field",
+                                },
+                                { pattern: /^\d+$/, message: 'Only numbers are allowed!' }
+                            ]}>
+                            <Input style={{width: 150}} onChange={handleTopChange} />px
+                        </Form.Item>
+                        <Form.Item
+                            label="Popup Image"
+                           
+                        >
+                             <input
+                                type='file'
+                                id='file'
+                                onChange={handleFileChange}
+                            />
+                        </Form.Item>
+                        <Form.Item label='Close Button Status' name='closeButtonStatus'
+                            rules={[
+                            {
+                                required: true,
+                                message: "Required field",
+                            },
+                        ]}>
+                            <Radio.Group
+                                initialValue={true}
+                                buttonStyle='solid'>
+                                <Radio.Button
+                                    key='true'
+                                    value='true'>
+                                    YES
+                                </Radio.Button>
+                                <Radio.Button
+                                    key='false'
+                                    value='false'>
+                                    NO
+                                </Radio.Button>
+                            </Radio.Group>
+                        </Form.Item>
+                        <Form.Item
+                            label='Link'
+                            name='link'
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Required field",
+                                },
+                            ]}>
+                            <Input />
+                        </Form.Item>
+
 
                         <p
                             style={{

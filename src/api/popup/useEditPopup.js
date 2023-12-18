@@ -7,7 +7,11 @@ const useEditPopup = () => {
 
 	const editPopup = async ({ id, edit }) => {
 		edit.language = lan;
-		const { data } = await axios.put(`/admin/main/pop-up/${id}`, edit);
+		const { data } = await axios.put(`/admin/main/pop-up/${id}`, edit, {
+			headers: {
+				"Content-Type": "multipart/form-data",
+			},
+		});
 		return data;
 	};
 
