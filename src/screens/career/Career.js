@@ -13,11 +13,9 @@ import {
   Badge,
   Button,
   Form,
-  Image,
   Input,
   Layout,
   Modal,
-  Radio,
   Select,
   Table,
 } from "antd";
@@ -38,7 +36,7 @@ const Career = () => {
   const [modalInfo, setModalInfo] = useState({});
   const [modalFor, setModalFor] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
-  const [newJobGroup, setNewJobGroup] = useState(null);
+  const [newJobGroup, setNewJobGroup] = useState('');
 
   const { data, isLoading, refetch } = useCareerList();
   const { mutate, isSuccess } = useAddCareer();
@@ -54,7 +52,7 @@ const Career = () => {
       key: "idd",
     },
     {
-      title: "Locaation",
+      title: "Location",
       dataIndex: "location",
       key: "location",
     },
@@ -335,7 +333,6 @@ const Career = () => {
               <Form.Item
                 label="Location"
                 name="location"
-                mode="tags"
                 rules={[
                   {
                     required: true,
@@ -344,14 +341,7 @@ const Career = () => {
                 ]}
                 style={{ marginTop: "30px" }}
               >
-                <Select
-                  defaultValue="Select Location"
-                  style={{ width: 150 }}
-                  options={[
-                    { value: "KOREA", label: "KOREA" },
-                    { value: "GLOBAL", label: "GLOBAL" },
-                  ]}
-                />
+                <Input width={100} />
               </Form.Item>
               <Form.Item
                 label="Job Title"
@@ -364,7 +354,7 @@ const Career = () => {
                 ]}
               >
                 <Select
-                  value={"Select Job Title"}
+                  placeholder="Select Job Title"
                   options={jobGroupData?.data?.dataList?.map((item) => ({
                     value: item.id,
                     label: item.name,
@@ -377,6 +367,7 @@ const Career = () => {
                     style={{ width: "300px" }}
                   />
                   <Button
+                    disabled={newJobGroup.trim().length === 0}
                     onClick={async () => {
                       try {
                         mutateJobGroup({

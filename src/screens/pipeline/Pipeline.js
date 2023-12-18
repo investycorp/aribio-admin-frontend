@@ -10,20 +10,16 @@ import {
 } from "../../components/style";
 import Sidebar from "../../components/Sidebar";
 import {
-	Badge,
 	Button,
 	Form,
-	Image,
 	Input,
 	Layout,
 	Modal,
-	Radio,
 	Select,
 	Table,
 } from "antd";
 import usePipelineList from "../../api/pipeline/usePipelineList";
 import {
-	MinusCircleOutlined,
 	MinusOutlined,
 	PlusOutlined,
 } from "@ant-design/icons";

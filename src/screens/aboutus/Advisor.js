@@ -13,12 +13,13 @@ import {
 	Table,
 } from "antd";
 
-import useNoticeList from "../../api/irpr/notice/useNoticeList";
-import useAddNotice from "../../api/irpr/notice/useAddNotice";
-import useDeleteNotice from "../../api/irpr/notice/useDeleteNotice";
-import useEditNotice from "../../api/irpr/notice/useEditNotice";
 
-const Notice = () => {
+import useAdvisorList from "../../api/aboutus/advisor/useAdvisorList";
+import useAddAdvisor from "../../api/aboutus/advisor/useAddAdvisor";
+import useDeleteAdvisor from "../../api/aboutus/advisor/useDeleteAdvisor";
+import useEditAdvisor from "../../api/aboutus/advisor/useEditAdvisor";
+
+const Advisor = () => {
 	const { TextArea } = Input;
 	const navigate = useNavigate();
 	const [form] = Form.useForm();
@@ -37,34 +38,31 @@ const Notice = () => {
 		"Approval",
 	];
 
-	const { data, isLoading, refetch } = useNoticeList();
-	const { mutate, isSuccess } = useAddNotice();
-	const { mutate: mutateEdit } = useEditNotice();
-	const { mutate: mutateDelete } = useDeleteNotice();
+	const { data, isLoading, refetch } = useAdvisorList();
+	const { mutate, isSuccess } = useAddAdvisor();
+	const { mutate: mutateEdit } = useEditAdvisor();
+	const { mutate: mutateDelete } = useDeleteAdvisor();
 
 	const listColumns = [
 		{
 			title: "ID",
 			dataIndex: "id",
-			key: "idd",
+			key: "id",
 		},
 		{
-			title: "Date",
-			dataIndex: "date",
+			title: "Name",
+			dataIndex: "name",
 			key: "date",
 		},
 		{
-			title: "Title",
-			dataIndex: "title",
-			key: "title",
-			render: (title) =>
-				title && title.length > 40 ? title.slice(0, 40) + "..." : title,
+			title: "Position",
+			dataIndex: "position",
+			key: "position",
 		},
 		{
-			title: "Image",
-			dataIndex: "fileDto",
-			key: "fileDto",
-			render: (fileDto) => fileDto && <Badge status='success' />,
+			title: "Contents",
+			dataIndex: "contents",
+			key: "contents",
 		},
 
 		{
@@ -87,9 +85,9 @@ const Notice = () => {
 							setSelectedFile();
 							let editData = {
 								id: record.id,
-								title: record.title,
+								name: record.name,
 								contents: record.contents,
-								fileDto: record.fileDto,
+								position: record.position,
 							};
 							console.log("editData", editData);
 							setIndication(editData.indication);
@@ -153,12 +151,13 @@ const Notice = () => {
 		await form
 			.validateFields()
 			.then(async (values) => {
-				const { title, contents } = await values;
+				const { name, position, contents } = await values;
 				try {
 					mutate({
-						title,
+						name,
 						contents,
-						file: selectedFile,
+						position
+						
 					});
 				} catch (error) {
 					console.log(error);
@@ -175,17 +174,13 @@ const Notice = () => {
 		await form
 			.validateFields()
 			.then(async (values) => {
-				const { title, contents } = await values;
+				const { name, position, contents } = await values;
 
 				const edit = {
-					title,
+					name,
+					position,
 					contents,
 				};
-				if (selectedFile) {
-					edit.file = selectedFile;
-				} else {
-					edit.fileId = modalInfo.fileDto?.fileId;
-				}
 
 				try {
 					mutateEdit({ id, edit });
@@ -221,20 +216,6 @@ const Notice = () => {
 		setIndication([{ indication: "", phase: "" }]);
 	};
 
-	const handleFileChange = (event) => {
-		const file = event.target.files[0];
-		if (file) {
-				const allowedExtensions = /(\.jpg|\.jpeg|\.png)$/i;
-				if (!allowedExtensions.exec(file.name)) {
-					alert('Invalid file type. Only JPG, JPEG, PNG files are allowed.');
-					event.target.value = '';
-					return;
-				}
-				setSelectedFile(file);
-				form.setFieldValue("fileUrl", "");
-			}
-	};
-
 	return (
 		<Layout
 			style={{
@@ -256,7 +237,7 @@ const Notice = () => {
 						padding: "0",
 					}}
 				>
-					<h1>Notice</h1>
+					<h1>Advisor</h1>
 					<div
 						style={{
 							marginTop: "50px",
@@ -302,9 +283,20 @@ const Notice = () => {
 					{modalFor === "add" ? (
 						<>
 							<Form.Item
-								label='Title'
-								name='title'
+								label='Name'
+								name='name'
 								style={{ marginTop: "30px" }}
+								rules={[
+									{
+											required: true,
+											message: "Required field",
+									}
+								]}>
+								<Input />
+							</Form.Item>
+							<Form.Item
+								label='Position'
+								name='position'
 								rules={[
 									{
 											required: true,
@@ -323,16 +315,6 @@ const Notice = () => {
 									}
 								]}>
 								<TextArea rows={4} />
-							</Form.Item>
-							<Form.Item label='Image Upload' style={{ margin: "20px 0" }}>
-								<div>
-									<input
-											type='file'
-											id='file'
-											onChange={handleFileChange}
-									/>
-									<span>(jpg, png only)</span>
-                </div>
 							</Form.Item>
 
 							<p
@@ -359,12 +341,12 @@ const Notice = () => {
 						</>
 					) : (
 						<>
-							<Form.Item label='ID' name='id' style={{ marginTop: "30px" }}>
+							<Form.Item label='ID' style={{ marginTop: "30px" }}>
 								{modalInfo.id}
 							</Form.Item>
 							<Form.Item
-								label='Title'
-								name='title'
+								label='Name'
+								name='name'
 								style={{ marginTop: "30px" }}
 								rules={[
 									{
@@ -373,6 +355,17 @@ const Notice = () => {
 									}
 							]}>
 								<Input />
+							</Form.Item>
+							<Form.Item
+								label='Position'
+								name='position'			
+								rules={[
+									{
+											required: true,
+											message: "Required field",
+									},
+							]}>
+								<TextArea rows={4} />
 							</Form.Item>
 							<Form.Item
 								label='Contents'
@@ -385,33 +378,7 @@ const Notice = () => {
 							]}>
 								<TextArea rows={4} />
 							</Form.Item>
-							<Form.Item label='Thumbnail'>
-								{!selectedFile && modalInfo?.fileDto ? (
-									<Image
-										src={modalInfo?.fileDto?.fileUrl}
-										width={150}
-										height={150}
-									/>
-								) : (
-									"No Image"
-								)}
-							</Form.Item>
-
-							<Form.Item label='Image Upload'>
-								<div>
-									<input
-											type='file'
-											id='file'
-											onChange={handleFileChange}
-									/>
-									<span>(jpg, png only)</span>
-                </div>
-								<p>
-									*Current Thumbnail will be replaced with New Image after
-									[Confirm]
-								</p>
-							</Form.Item>
-
+						
 							<p
 								style={{
 									display: "flex",
@@ -441,4 +408,4 @@ const Notice = () => {
 	);
 };
 
-export default Notice;
+export default Advisor;

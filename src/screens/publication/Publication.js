@@ -13,7 +13,6 @@ import {
     Modal,
     Radio,
     Table,
-    message,
 } from "antd";
 
 import usePublicationList from "../../api/publication/usePublicationList";
@@ -29,6 +28,7 @@ const Publication = () => {
     const [modalInfo, setModalInfo] = useState({});
     const [modalFor, setModalFor] = useState("");
     const [selectedFile, setSelectedFile] = useState(null);
+    const [isFormValid, setIsFormValid] = useState(false);
 
     const { data, isLoading, refetch } = usePublicationList();
     const { mutate, isSuccess } = useAddPublication();
@@ -107,7 +107,7 @@ const Publication = () => {
                             setSelectedFile();
                             let editData = {
                                 id: record.id,
-                                date: `${record.year}-${record.month}-${record.day}`,
+                                date: record.date,
                                 type: record.type,
                                 journal: record.journal,
                                 title: record.title,
@@ -242,8 +242,47 @@ const Publication = () => {
     };
 
     const handleFileChange = (event) => {
-        setSelectedFile(event.target.files[0]);
-        form.setFieldValue("fileUrl", "");
+        const file = event.target.files[0];
+        if (file) {
+            const allowedExtensions = /(\.jpg|\.jpeg|\.png)$/i;
+            if (!allowedExtensions.exec(file.name)) {
+              alert('Invalid file type. Only JPG, JPEG, PNG files are allowed.');
+              event.target.value = '';
+              return;
+            }
+            setSelectedFile(file);
+            form.setFieldValue("fileUrl", "");
+          }
+    };
+
+    const handleFieldsChange = (_, allFields) => {
+        const isAllFieldsValid = allFields.every(field => field.errors.length === 0);
+        setIsFormValid(isAllFieldsValid);
+    };
+
+    const isValidDate = (value) => {
+        const regex = /^\d{4}-\d{2}-\d{2}$/;
+        if (!regex.test(value)) {
+            return false;
+        }
+
+        const date = new Date(value);
+        const timestamp = date.getTime();
+
+        if (typeof timestamp !== 'number' || Number.isNaN(timestamp)) {
+            return false;
+        }
+
+        return date.toISOString().startsWith(value);
+    };
+
+    const dateValidationRule = {
+        validator: (_, value) => {
+            if (!value || isValidDate(value)) {
+                return Promise.resolve();
+            }
+            return Promise.reject(new Error('Invalid date format. Use YYYY-MM-DD'));
+        },
     };
 
     return (
@@ -305,6 +344,7 @@ const Publication = () => {
                 footer={null}>
                 <Form
                     {...formItemLayout}
+                    onFieldsChange={handleFieldsChange}
                     form={form}
                     name={
                         modalFor === "add"
@@ -317,13 +357,26 @@ const Publication = () => {
                             <Form.Item
                                 label='Date'
                                 name='date'
-                                style={{ marginTop: "30px" }}>
+                                style={{ marginTop: "30px" }}
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Required field",
+                                    },
+                                    dateValidationRule
+                                ]}>
                                 <Input
                                     style={{ width: "130px" }}
                                     placeholder='YYYY-MM-DD'
                                 />
                             </Form.Item>
-                            <Form.Item label='Type' name='type'>
+                            <Form.Item label='Type' name='type'
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Required field",
+                                    },
+                            ]}>
                                 <Radio.Group
                                     initialValue={modalInfo?.type}
                                     buttonStyle='solid'>
@@ -340,23 +393,44 @@ const Publication = () => {
                                     </Radio.Button>
                                 </Radio.Group>
                             </Form.Item>
-                            <Form.Item label='Journal' name='journal'>
+                            <Form.Item label='Journal' name='journal'
+                             rules={[
+                                {
+                                    required: true,
+                                    message: "Required field",
+                                },
+                            ]}>
                                 <Input />
                             </Form.Item>
-                            <Form.Item label='Title' name='title'>
+                            <Form.Item label='Title' name='title'
+                             rules={[
+                                {
+                                    required: true,
+                                    message: "Required field",
+                                },
+                            ]}>
                                 <Input />
                             </Form.Item>
-                            <Form.Item label='Link' name='url'>
+                            <Form.Item label='Link' name='url'
+                             rules={[
+                                {
+                                    required: true,
+                                    message: "Required field",
+                                },
+                            ]}>
                                 <Input />
                             </Form.Item>
                             <Form.Item
-                                label='Thumbnail Upload'
+                                label='Thumbnail'
                                 style={{ margin: "20px 0" }}>
-                                <input
-                                    type='file'
-                                    id='file'
-                                    onChange={handleFileChange}
-                                />
+                                <div>
+                                    <input
+                                        type='file'
+                                        id='file'
+                                        onChange={handleFileChange}
+                                    />
+                                    <span>(jpg, png only)</span>
+                                </div>
                             </Form.Item>
 
                             <p
@@ -369,6 +443,7 @@ const Publication = () => {
                                 }}>
                                 <Button
                                     type='primary'
+                                    disabled={!isFormValid}
                                     onClick={(event) => {
                                         event.stopPropagation();
                                         handleAdd();
@@ -386,13 +461,27 @@ const Publication = () => {
                                 style={{ marginTop: "30px" }}>
                                 {modalInfo.id}
                             </Form.Item>
-                            <Form.Item label='Date' name='date'>
+                            <Form.Item label='Date' name='date'
+                             rules={[
+                                {
+                                    required: true,
+                                    message: "Required field",
+                                },
+                                dateValidationRule
+                            ]}>
                                 <Input
+                                    initialValue={modalInfo?.date}
                                     style={{ width: "130px" }}
                                     placeholder='YYYY-MM-DD'
                                 />
                             </Form.Item>
-                            <Form.Item label='Type' name='type'>
+                            <Form.Item label='Type' name='type'
+                             rules={[
+                                {
+                                    required: true,
+                                    message: "Required field",
+                                },
+                            ]}>
                                 <Radio.Group
                                     initialValue={modalInfo?.type}
                                     buttonStyle='solid'>
@@ -409,13 +498,31 @@ const Publication = () => {
                                     </Radio.Button>
                                 </Radio.Group>
                             </Form.Item>
-                            <Form.Item label='Journal' name='journal'>
+                            <Form.Item label='Journal' name='journal'
+                             rules={[
+                                {
+                                    required: true,
+                                    message: "Required field",
+                                },
+                            ]}>
                                 <Input />
                             </Form.Item>
-                            <Form.Item label='Title' name='title'>
+                            <Form.Item label='Title' name='title'
+                             rules={[
+                                {
+                                    required: true,
+                                    message: "Required field",
+                                },
+                            ]}>
                                 <Input />
                             </Form.Item>
-                            <Form.Item label='Link' name='url'>
+                            <Form.Item label='Link' name='url'
+                             rules={[
+                                {
+                                    required: true,
+                                    message: "Required field",
+                                },
+                            ]}>
                                 <Input />
                             </Form.Item>
                             <Form.Item label='Thumbnail'>
@@ -431,11 +538,14 @@ const Publication = () => {
                             </Form.Item>
 
                             <Form.Item label='New Thumbnail'>
-                                <input
-                                    type='file'
-                                    id='file'
-                                    onChange={handleFileChange}
-                                />
+                                <div>
+                                    <input
+                                        type='file'
+                                        id='file'
+                                        onChange={handleFileChange}
+                                    />
+                                    <span>(jpg, png only)</span>
+                                </div>
                                 <p>
                                     *Current Thumbnail will be replaced with New
                                     Image after [Confirm]

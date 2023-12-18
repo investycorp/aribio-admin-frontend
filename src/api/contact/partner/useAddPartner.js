@@ -18,7 +18,7 @@ const useAddPartner = () => {
         postPartner,
         {
             onSuccess: () => {
-                queryClient.invalidateQueries("careerList");
+                queryClient.invalidateQueries("partnerList");
                 console.log("success:", data);
             },
         }

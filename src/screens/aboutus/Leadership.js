@@ -1,37 +1,47 @@
 import React, { useState, useEffect } from "react";
+import { useRecoilState } from "recoil";
 import { useNavigate } from "react-router-dom";
-import { Wrap } from "../../components/style";
+import { Container, Wrap } from "../../components/style";
 import Sidebar from "../../components/Sidebar";
-import { Button, Form, Input, Layout, Modal, Radio, Table } from "antd";
-import useHistoryList from "../../api/history/useHistoryList";
-import useAddHistory from "../../api/history/useAddHistory ";
-import useHistoryTypeList from "../../api/history/useHistoryTypeList ";
-import HistoryType from "./HistoryType";
-import useEditHistory from "../../api/history/useEditHistory ";
-import useDeleteHistory from "../../api/history/useDeleteHistory";
+import {
+    Alert,
+    Badge,
+    Button,
+    Checkbox,
+    Form,
+    Image,
+    Input,
+    Layout,
+    Modal,
+    Select,
+    Table,
+    message,
 
-const History = () => {
-    const { Search } = Input;
+} from "antd";
+import TextArea from "antd/es/input/TextArea";
+
+import useLeadershipList from "../../api/aboutus/leadership/useLeadershipList";
+import useAddLeadership from "../../api/aboutus/leadership/useAddLeadership";
+import useDeleteLeadership from "../../api/aboutus/leadership/useDeleteLeadership";
+import useEditLeadership from "../../api/aboutus/leadership/useEditLeadership";
+
+
+const Leadership = () => {
     const navigate = useNavigate();
     const [form] = Form.useForm();
+    const [page, setPage] = useState(1);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalInfo, setModalInfo] = useState({});
     const [modalFor, setModalFor] = useState("");
-    const [filteredList, setFilteredList] = useState([]);
-    const [searchValue, setSearchValue] = useState("");
-    const [isFormValid, setIsFormValid] = useState(false);
+    const [selectedFile, setSelectedFile] = useState(null);
 
-    const { data, isLoading, isError, error } = useHistoryList();
-    const {
-        data: typeData,
-        isLoading: typeIsLoading,
-        isError: typeIsError,
-        error: typeError,
-    } = useHistoryTypeList();
-    const { mutate, isSuccess } = useAddHistory();
-    const { mutate: mutateEdit, isSuccess: isSuccessEdit } = useEditHistory();
-    const { mutate: mutateDelete, isSuccess: isSuccessDelete } =
-        useDeleteHistory();
+    const { data, isLoading, refetch } = useLeadershipList();
+    const { mutate, isError: errorAdd } = useAddLeadership();
+    const { mutate: mutateEdit, isError: errorEdit } = useEditLeadership();
+    const { mutate: mutateDelete } = useDeleteLeadership();
+
+    const [types, setTypes] = useState(['CEO', 'HEAD', 'US']);
+
     const listColumns = [
         {
             title: "ID",
@@ -39,50 +49,38 @@ const History = () => {
             key: "id",
         },
         {
-            title: "Date",
-            dataIndex: "date",
-            key: "date",
-            sorter: (a, b) => a.date - b.date,
-            // filter: [
-            // 	{
-            // 		text: "2023",
-            // 		value: "2023",
-            // 	}
-            // ],
-            // render: (_, record) => (
-            //     <span>
-            //         {record?.year}-{record?.month.toString().length < 2 && "0"}
-            //         {record?.month}-{record?.day?.toString().length < 2 && "0"}
-            //         {record?.day}
-            //     </span>
-            // ),
+            title: "Type",
+            dataIndex: "leadershipType",
+            key: "leadershipType",
         },
-
         {
-            title: "Category",
-            dataIndex: "historyTypeId",
-            key: "historyTypeId",
-            render: (id) => {
-                let type;
-                typeData?.data?.dataList.map((item) => {
-                    if (item?.id === id) {
-                        type = ` ${item?.startYear} ~ ${item?.endYear}`;
-                    }
-                });
-                return type;
-            },
+            title: "Name",
+            dataIndex: "name",
+            key: "name",
+        },
+        {
+            title: "Position",
+            dataIndex: "position",
+            key: "position",
+        },
+        {
+            title: "Photo",
+            dataIndex: "fileDto",
+            key: "fileDto",
+            render: (fileDto) => (
+                fileDto?.fileId && (
+                     <Badge status='success' />
+                )
+            )
         },
         {
             title: "Contents",
             dataIndex: "contents",
             key: "contents",
             render: (text) => (
-                <span>
-                    {text?.slice(0, 45)}
-                    {text?.length > 45 && "..."}
-                </span>
-            ),
+                <span>{text?.split("\\n")[0]}...</span> )
         },
+       
 
         {
             title: "",
@@ -98,13 +96,18 @@ const History = () => {
                     <Button
                         style={{ marginRight: "10px" }}
                         onClick={async (event) => {
+                            setModalFor("edit");
                             event.stopPropagation();
+                            setSelectedFile();
                             let editData = {
                                 id: record.id,
-                                date: record.date,
-                                historyTypeId: record.historyTypeId,
+                                position: record.position,
+                                name: record.name,
+                                leadershipType: record.leadershipType,
                                 contents: record.contents,
+                                fileDto: record.fileDto,
                             };
+                            console.log("editData", editData);
                             await setModalInfo(editData);
                             form.setFieldsValue(editData);
                             setTimeout(() => {
@@ -137,7 +140,6 @@ const History = () => {
             ),
         },
     ];
-    
     const formItemLayout = {
         labelCol: {
             xs: { span: 4 },
@@ -155,10 +157,7 @@ const History = () => {
         }
 
         if (data?.data.success) {
-            // console.log(data.data);
-            setFilteredList(data?.data?.dataList);
-        }
-        if (typeData?.data.success) {
+            console.log(data.data);
         }
     }, [data]);
 
@@ -166,20 +165,23 @@ const History = () => {
         await form
             .validateFields()
             .then(async (values) => {
-                const { date, contents, historyTypeId } = await values;
+                const { position, name, contents, leadershipType } = await values;
+
+                const add = {
+                    position, name, contents, leadershipType
+                };
+
+                if (selectedFile) {
+                    add.file = selectedFile;
+                }
 
                 try {
-                    mutate({
-                        date,
-                        contents,
-                        historyTypeId,
-                    });
+                    mutate(add);
+                    if (!errorAdd) {
+                        handleCancel();
+                    }
                 } catch (error) {
-                    console.log(error);
-                } finally {
-                    // await refetch();
-                    handleCancel();
-                    // window.location.reload();
+                    window.alert(error.data.message);
                 }
             })
             .catch((error) => {
@@ -191,23 +193,24 @@ const History = () => {
         await form
             .validateFields()
             .then(async (values) => {
-                const { year, month, day, contents, historyTypeId } =
-                    await values;
-                const edit = await {
-                    year,
-                    month,
-                    day,
-                    contents,
-                    historyTypeId,
+                const {  position, name, contents, leadershipType } = await values;
+                console.log(values);
+                const edit = {
+                    position, name, contents, leadershipType
                 };
+                if (selectedFile) {
+                    edit.file = selectedFile;
+                } else if (modalInfo.fileDto?.fileId) {
+                    edit.fileId = modalInfo.fileDto.fileId;
+                }
 
                 try {
-                    console.log("edit: ", edit);
                     mutateEdit({ id, edit });
+                    if (!errorEdit) {
+                        handleCancel();
+                    }
                 } catch (error) {
                     console.log(error);
-                } finally {
-                    handleCancel();
                 }
             })
             .catch((error) => {
@@ -231,98 +234,57 @@ const History = () => {
         form.resetFields();
         setModalInfo({});
         setIsModalOpen(false);
+        setSelectedFile();
         setModalFor("");
     };
 
-    const onSearch = (value) => {
-        setSearchValue(value);
-        let filteredData = data?.data?.dataList.filter((item) => {
-            return (
-                item.contents.toLowerCase().includes(value.toLowerCase()) ||
-                item.year.toString().includes(value)
-            );
-        });
-        setFilteredList(filteredData);
-    };
-
-    const handleFieldsChange = (_, allFields) => {
-        const isAllFieldsValid = allFields.every(field => field.errors.length === 0);
-        setIsFormValid(isAllFieldsValid);
-    };
-
-    const isValidDate = (value) => {
-        const regex = /^\d{4}-\d{2}-\d{2}$/;
-        if (!regex.test(value)) {
-            return false;
-        }
-
-        const date = new Date(value);
-        const timestamp = date.getTime();
-
-        if (typeof timestamp !== 'number' || Number.isNaN(timestamp)) {
-            return false;
-        }
-
-        return date.toISOString().startsWith(value);
-    };
-
-    const dateValidationRule = {
-        validator: (_, value) => {
-            if (!value || isValidDate(value)) {
-                return Promise.resolve();
-            }
-            return Promise.reject(new Error('Invalid date format. Use YYYY-MM-DD'));
-        },
+    const handleFileChange = (event) => {
+        setSelectedFile(event.target.files[0]);
+        console.log(event.target.files[0])
+        form.setFieldValue("fileUrl", "");
     };
 
     return (
         <Layout
             style={{
                 width: "100vw",
-                height: "100vh",
+                minHeight: "100vh",
                 display: "grid",
                 gridTemplateColumns: "200px 1fr",
-                overflow: "hidden",
             }}>
-            <Sidebar page='history' />
-            <Wrap style={{ width: "100%" }}>
-                <h1 style={{ width: "100%", textAlign: "start" }}>History</h1>
-                <HistoryType />
-
+            <Sidebar page='adminusers' />
+            <Wrap>
                 <div
                     style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "start",
                         width: "100%",
+                        height: "fit-content",
+                        padding: "0",
                     }}>
-                    <h2
+                    <h1>Leadership</h1>
+                    <div
                         style={{
+                            marginTop: "50px",
+                            marginBottom: "30px",
                             width: "100%",
-                            textAlign: "start",
-                            margin: "20px 0",
                         }}>
-                        History Contents
-                    </h2>
-                    <div>
                         <Button
                             type='primary'
                             onClick={() => {
                                 setModalFor("add");
                                 setModalInfo({});
                                 setIsModalOpen(true);
+                                setSelectedFile();
                             }}>
                             Add Data
                         </Button>
                     </div>
-                    <div style={{ margin: "20px 0", width: "300px" }}>
-                        <Search
-                            placeholder='input search text'
-                            allowClear
-                            enterButton='Search'
-                            size='large'
-                            onSearch={onSearch}
-                        />
-                    </div>
+
+                    
                     <Table
-                        dataSource={filteredList}
+                        dataSource={data?.data?.dataList ? data.data.dataList : []}
                         columns={listColumns}
                         loading={isLoading}
                         style={{ marginTop: "20px", width: "100%" }}
@@ -331,57 +293,60 @@ const History = () => {
                 </div>
             </Wrap>
             <Modal
-                title={modalFor === "add" ? "Add New Admin" : "Edit Admin User"}
+                width={800}
+                title={modalFor === "add" ? "Add New Leadership" : "Edit Leadership"}
                 open={isModalOpen}
                 // confirmLoading={confirmLoading}
-                width={700}
                 onCancel={handleCancel}
                 footer={null}>
                 <Form
                     {...formItemLayout}
-                    onFieldsChange={handleFieldsChange}
                     form={form}
-                    name={modalFor === "add" ? "addAdmin" : "editAdmin"}
+                    name={modalFor === "add" ? "addLeadership" : "editLeadership"}
                     autoComplete='off'>
                     {modalFor === "add" ? (
                         <>
                             <Form.Item
-                                label='Date'
-                                name='date'
+                                label='Type'
+                                name='leadershipType'
                                 rules={[
                                     {
                                         required: true,
                                         message: "Required field",
                                     },
-                                    dateValidationRule
-                                ]}>
-                                <Input placeholder='YYYY-MM-DD' style={{width: 150}} />
+                                ]}
+                                style={{ marginTop: "30px" }}>
+                                 <Select
+                                    placeholder="Select Type"
+                                    options={types?.map((item) => ({
+                                        value: item,
+                                        label: item,
+                                    }))}
+                                    />
                             </Form.Item>
                             <Form.Item
-                                label='Category'
-                                name='historyTypeId'
+                                label='Name'
+                                name='name'
                                 rules={[
                                     {
                                         required: true,
                                         message: "Required field",
                                     },
-                                ]}>
-                                <Radio.Group
-                                    initialValue={modalInfo?.historyTypeId}
-                                    buttonStyle='solid'>
-                                    {typeData?.data?.dataList.map((item) => {
-                                        if (item.id) {
-                                            return (
-                                                <Radio.Button
-                                                    key={item.id}
-                                                    value={item.id}>
-                                                    {item.startYear} ~{" "}
-                                                    {item.endYear}
-                                                </Radio.Button>
-                                            );
-                                        }
-                                    })}
-                                </Radio.Group>
+                                ]}
+                                style={{ marginTop: "30px" }}>
+                                <Input />
+                            </Form.Item>
+                            <Form.Item
+                                label='Position'
+                                name='position'
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Required field",
+                                    },
+                                ]}
+                                style={{ marginTop: "30px" }}>
+                                <Input />
                             </Form.Item>
                             <Form.Item
                                 label='Contents'
@@ -391,8 +356,18 @@ const History = () => {
                                         required: true,
                                         message: "Required field",
                                     },
-                                ]}>
-                                <Input />
+                                ]}
+                                style={{ marginTop: "30px" }}>
+                                <TextArea rows={4} />
+                            </Form.Item>
+                           
+                            <Form.Item label='Photo'>
+                                <input
+                                    type='file'
+                                    id='file'
+                                    onChange={handleFileChange}
+                                />
+                                
                             </Form.Item>
 
                             <p
@@ -405,7 +380,6 @@ const History = () => {
                                 }}>
                                 <Button
                                     type='primary'
-                                    disabled={!isFormValid}
                                     onClick={(event) => {
                                         event.stopPropagation();
                                         handleAdd();
@@ -417,50 +391,54 @@ const History = () => {
                         </>
                     ) : (
                         <>
-                            <Form.Item label='ID' style={{ margin: "0" }}>
+                            <Form.Item
+                                label='ID'
+                                style={{ marginTop: "30px" }}>
                                 {modalInfo.id}
                             </Form.Item>
                             <Form.Item
-                                label='Date'
-                                name='date'
+                                label='Type'
+                                name='leadershipType'
                                 rules={[
                                     {
                                         required: true,
                                         message: "Required field",
                                     },
-                                    dateValidationRule,
-                                ]}>
-                               <Input placeholder="YYYY-MM-DD" style={{width: 150}} />
+                                ]}
+                                style={{ marginTop: "30px" }}>
+                                    <Select
+                                        placeholder="Select Type"
+                                        options={types?.map((item) => ({
+                                            value: item,
+                                            label: item,
+                                        }))}
+                                        />
                             </Form.Item>
                             <Form.Item
-                                label='Category'
-                                name='historyTypeId'
+                                label='Name'
+                                name='name'
                                 rules={[
                                     {
                                         required: true,
                                         message: "Required field",
                                     },
-                                ]}>
-                                {/* <Input style={{ width: "70px" }} /> */}
-                                <Radio.Group
-                                    initialValue={modalInfo?.historyTypeId}
-                                    buttonStyle='solid'>
-                                    {typeData?.data?.dataList.map((item) => {
-                                        if (item.id) {
-                                            return (
-                                                <Radio.Button
-                                                    key={item.id}
-                                                    value={item.id}>
-                                                    {item.startYear} ~{" "}
-                                                    {item.endYear}
-                                                </Radio.Button>
-                                            );
-                                        }
-                                    })}
-                                </Radio.Group>
+                                ]}
+                                style={{ marginTop: "30px" }}>
+                                <Input />
                             </Form.Item>
                             <Form.Item
-                                layout='vertical'
+                                label='Position'
+                                name='position'
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Required field",
+                                    },
+                                ]}
+                                style={{ marginTop: "30px" }}>
+                                <Input />
+                            </Form.Item>
+                            <Form.Item
                                 label='Contents'
                                 name='contents'
                                 rules={[
@@ -468,9 +446,41 @@ const History = () => {
                                         required: true,
                                         message: "Required field",
                                     },
-                                ]}>
-                                <Input />
+                                ]}
+                                style={{ marginTop: "30px" }}>
+                                <TextArea rows={4} />
                             </Form.Item>
+                            <Form.Item label='Photo'>
+                                <div >
+                                {/* <span>{modalInfo.fileDto?.fileName}</span> */}
+                                <Image src={modalInfo.fileDto?.fileUrl} width={200} />
+                                </div>
+                            </Form.Item>
+
+                            <Form.Item label='New Photo'>
+                                <input
+                                    type='file'
+                                    id='file'
+                                    onChange={handleFileChange}
+                                />
+                                <p style={{ margin: "10px 0" }}>
+                                    * Current Image will be replaced with New
+                                    Image after [Edit]
+                                </p>
+                            </Form.Item>
+
+                            {/* <Form.Item label='Upload Video'>
+                                <input
+                                    type='file'
+                                    id='file'
+                                    onChange={handleFileChange}
+                                />
+                                <span>Upload to the server</span>
+                            </Form.Item> */}
+                            {/* <p style={{ margin: "10px 30px" }}>
+                                * Current Link will be replaced with New
+                                Uploaded Video Link after [Confirm]
+                            </p> */}
 
                             <p
                                 style={{
@@ -481,8 +491,8 @@ const History = () => {
                                     alignItems: "center",
                                 }}>
                                 <Button
-                                    type='primary'
                                     disabled={false}
+                                    type='primary'
                                     onClick={(event) => {
                                         event.stopPropagation();
                                         handleEdit(modalInfo.id);
@@ -499,4 +509,4 @@ const History = () => {
     );
 };
 
-export default History;
+export default Leadership;

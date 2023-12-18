@@ -4,14 +4,14 @@ import { useNavigate } from "react-router-dom";
 import { Container, Wrap } from "../../components/style";
 import Sidebar from "../../components/Sidebar";
 import {
+    Alert,
     Badge,
     Button,
+    Checkbox,
     Form,
-    Image,
     Input,
     Layout,
     Modal,
-    Radio,
     Table,
     message,
 } from "antd";
@@ -30,8 +30,8 @@ const Media = () => {
     const [selectedFile, setSelectedFile] = useState(null);
 
     const { data, isLoading, refetch } = useMediaList();
-    const { mutate, isSuccess } = useAddMedia();
-    const { mutate: mutateEdit } = useEditMedia();
+    const { mutate, isError: errorAdd } = useAddMedia();
+    const { mutate: mutateEdit, isError: errorEdit } = useEditMedia();
     const { mutate: mutateDelete } = useDeleteMedia();
 
     const listColumns = [
@@ -50,7 +50,6 @@ const Media = () => {
             dataIndex: "title",
             key: "title",
         },
-
         {
             title: "URL Type",
             dataIndex: "url",
@@ -179,12 +178,11 @@ const Media = () => {
 
                 try {
                     mutate(add);
+                    if (!errorAdd) {
+                        handleCancel();
+                    }
                 } catch (error) {
-                    console.log(error);
-                } finally {
-                    // await refetch();
-                    handleCancel();
-                    // window.location.reload();
+                    window.alert(error.data.message);
                 }
             })
             .catch((error) => {
@@ -197,10 +195,10 @@ const Media = () => {
             .validateFields()
             .then(async (values) => {
                 const { title, representative, url } = await values;
-
+                console.log(values);
                 const edit = {
                     title,
-                    representative: representative ? true : false,
+                    representative,
                     url,
                 };
                 if (selectedFile) {
@@ -209,14 +207,13 @@ const Media = () => {
                     edit.fileId = modalInfo.fileDto.fileId;
                 }
 
-                console.log("edit", edit);
-
                 try {
                     mutateEdit({ id, edit });
+                    if (!errorEdit) {
+                        handleCancel();
+                    }
                 } catch (error) {
                     console.log(error);
-                } finally {
-                    handleCancel();
                 }
             })
             .catch((error) => {
@@ -272,6 +269,7 @@ const Media = () => {
                     <div
                         style={{
                             marginTop: "50px",
+                            marginBottom: "30px",
                             width: "100%",
                         }}>
                         <Button
@@ -285,6 +283,17 @@ const Media = () => {
                             Add Media
                         </Button>
                     </div>
+
+                    <h2>Representative Media</h2>
+                    <Table
+                        dataSource={data?.data?.data?.representativeMediaKitDto ? [data.data.data.representativeMediaKitDto] : []}
+                        columns={listColumns}
+                        loading={isLoading}
+                        style={{ marginTop: "20px", width: "100%" }}
+                        rowKey={(record) => record.id}
+                    />
+
+                    <h2>Normal Media</h2>
                     <Table
                         dataSource={data?.data?.data?.mediaKitDtoList}
                         columns={listColumns}
@@ -299,7 +308,6 @@ const Media = () => {
                 title={modalFor === "add" ? "Add New Media" : "Edit Media"}
                 open={isModalOpen}
                 // confirmLoading={confirmLoading}
-
                 onCancel={handleCancel}
                 footer={null}>
                 <Form
@@ -323,9 +331,10 @@ const Media = () => {
                             </Form.Item>
                             <Form.Item
                                 label='Is this Main Video?'
-                                name='representative'>
-                                <Input
-                                    type='checkbox'
+                                name='representative'
+                                valuePropName="checked"
+                                >
+                                <Checkbox
                                     style={{ width: "40px" }}
                                 />
                             </Form.Item>
@@ -400,9 +409,10 @@ const Media = () => {
                             </Form.Item>
                             <Form.Item
                                 label='Is this Main Video?'
-                                name='representative'>
-                                <Input
-                                    type='checkbox'
+                                name='representative'
+                                valuePropName="checked"
+                                >
+                                 <Checkbox
                                     style={{ width: "40px" }}
                                 />
                             </Form.Item>

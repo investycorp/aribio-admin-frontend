@@ -1,13 +1,16 @@
 import axios from "axios";
 import { useMutation, useQueryClient } from "react-query";
+import { useRecoilState } from "recoil";
+import Language from "../../../atoms/Language";
 
-const useEditMedia = () => {
-    const lan = "ENGLISH";
+const useAddLeadership = () => {
+	const [language, setLanguage] = useRecoilState(Language);
+	const lan = language === "ENG" ? "ENGLISH" : "KOREAN";
     const queryClient = useQueryClient();
 
-    const editMedia = async ({ id, edit }) => {
-        edit.language = lan;
-        const { data } = await axios.put(`/admin/media-kit/${id}`, edit, {
+    const postLeadership = async (formData) => {
+        formData.language = lan;
+        const { data } = await axios.post(`/admin/about-us/leadership`, formData, {
             headers: {
                 "Content-Type": "multipart/form-data",
             },
@@ -16,12 +19,12 @@ const useEditMedia = () => {
     };
 
     const { mutate, data, isSuccess, isError, isLoading } = useMutation(
-        editMedia,
+        postLeadership,
         {
             onSuccess: () => {
-                queryClient.invalidateQueries("mediaList");
+                queryClient.invalidateQueries("leadershipList");
             },
-            onError: error => {
+            onError: (error) => {
                 window.alert("Only one representative video can be set.");
             }
         }
@@ -30,4 +33,4 @@ const useEditMedia = () => {
     return { mutate, data, isSuccess, isError, isLoading };
 };
 
-export default useEditMedia;
+export default useAddLeadership;

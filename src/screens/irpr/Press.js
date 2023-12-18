@@ -11,8 +11,6 @@ import {
 	Input,
 	Layout,
 	Modal,
-	Radio,
-	Select,
 	Table,
 } from "antd";
 import usePressList from "../../api/irpr/press/usePressList";
@@ -214,8 +212,17 @@ const Press = () => {
 	};
 
 	const handleFileChange = (event) => {
-		setSelectedFile(event.target.files[0]);
-		form.setFieldValue("fileUrl", "");
+		const file = event.target.files[0];
+		if (file) {
+				const allowedExtensions = /(\.jpg|\.jpeg|\.png)$/i;
+				if (!allowedExtensions.exec(file.name)) {
+					alert('Invalid file type. Only JPG, JPEG, PNG files are allowed.');
+					event.target.value = '';
+					return;
+				}
+				setSelectedFile(file);
+				form.setFieldValue("fileUrl", "");
+			}
 	};
 
 	return (
@@ -270,7 +277,7 @@ const Press = () => {
 			<Modal
 				width={800}
 				style={{ overflowY: "scroll" }}
-				title={modalFor === "add" ? "Add New Pipeline" : "Edit Pipeline"}
+				title={modalFor === "add" ? "Add New Press Release" : "Edit Press Release"}
 				open={isModalOpen}
 				// confirmLoading={confirmLoading}
 
@@ -280,7 +287,7 @@ const Press = () => {
 				<Form
 					{...formItemLayout}
 					form={form}
-					name={modalFor === "add" ? "addpipeline" : "editpipeline"}
+					name={modalFor === "add" ? "addpress" : "editpress"}
 					autoComplete='off'
 				>
 					{modalFor === "add" ? (
@@ -289,14 +296,34 @@ const Press = () => {
 								label='Title'
 								name='title'
 								style={{ marginTop: "30px" }}
-							>
+								rules={[
+									{
+											required: true,
+											message: "Required field",
+									}
+								]}>
 								<Input />
 							</Form.Item>
-							<Form.Item label='Contents' name='contents'>
+							<Form.Item
+								label='Contents'
+								name='contents'
+								rules={[
+									{
+											required: true,
+											message: "Required field",
+									}
+								]}>
 								<TextArea rows={4} />
 							</Form.Item>
 							<Form.Item label='Image Upload' style={{ margin: "20px 0" }}>
-								<input type='file' id='file' onChange={handleFileChange} />
+								<div>
+										<input
+												type='file'
+												id='file'
+												onChange={handleFileChange}
+										/>
+										<span>(jpg, png only)</span>
+								</div>
 							</Form.Item>
 
 							<p
@@ -330,10 +357,23 @@ const Press = () => {
 								label='Title'
 								name='title'
 								style={{ marginTop: "30px" }}
-							>
+								rules={[
+									{
+											required: true,
+											message: "Required field",
+									}
+								]}>
 								<Input />
 							</Form.Item>
-							<Form.Item label='Contents' name='contents'>
+							<Form.Item
+								label='Contents'
+								name='contents'
+								rules={[
+									{
+											required: true,
+											message: "Required field",
+									}
+								]}>
 								<TextArea rows={4} />
 							</Form.Item>
 							<Form.Item label='Thumbnail'>
@@ -349,7 +389,14 @@ const Press = () => {
 							</Form.Item>
 
 							<Form.Item label='Image Upload'>
-								<input type='file' id='file' onChange={handleFileChange} />
+								<div>
+										<input
+												type='file'
+												id='file'
+												onChange={handleFileChange}
+										/>
+										<span>(jpg, png only)</span>
+								</div>
 								<p>
 									*Current Thumbnail will be replaced with New Image after
 									[Confirm]
