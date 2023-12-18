@@ -345,14 +345,13 @@ const Career = () => {
                 <Input width={100} />
               </Form.Item>
               <Form.Item
-                label="Job Title"
+                label={
+                  <>
+                      <span style={{color: '#ff4d4f', fontSize: 14}}>* </span>
+                      <span>Job Title</span>
+                  </>
+                }
                 name="jobGroupId"
-                rules={[
-                  {
-                    required: true,
-                    message: "Required field",
-                  },
-                ]}
               >
                 <Select
                   placeholder="Select Job Title"
@@ -360,6 +359,9 @@ const Career = () => {
                     value: item.id,
                     label: item.name,
                   }))}
+                  onChange={id => {
+                    form.setFieldsValue({jobGroupId: id});
+                  }}
                 />
                 <Form.Item label="Add New">
                   <Input
@@ -459,7 +461,12 @@ const Career = () => {
                 <Input width={100} />
               </Form.Item>
               <Form.Item
-                label="Job Title"
+                 label={
+                  <>
+                      <span style={{color: '#ff4d4f', fontSize: 14}}>* </span>
+                      <span>Job Title</span>
+                  </>
+                }
                 name="jobGroupId"
                 rules={[
                   {
@@ -476,6 +483,9 @@ const Career = () => {
                     value: item.id,
                     label: item.name,
                   }))}
+                  onChange={id => {
+                    form.setFieldsValue({jobGroupId: id});
+                  }}
                 />
                 <Form.Item label="Add New">
                   <Input
