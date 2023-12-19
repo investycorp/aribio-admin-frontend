@@ -22,6 +22,7 @@ const useEditMedia = () => {
                 queryClient.invalidateQueries("mediaList");
             },
             onError: error => {
+                console.log(error);
                 window.alert("Only one representative video can be set.");
             }
         }
