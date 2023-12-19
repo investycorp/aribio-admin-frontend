@@ -25,7 +25,7 @@ const FormRowWrap = styled.div`
 	justify-content: start;
 	margin-left: 40px;
 	gap: 15px;
-	width: 70%;
+	width: 90%;
 `;
 
 const FormLabel = styled.label`
