@@ -99,7 +99,7 @@ const Leadership = () => {
                         onClick={async (event) => {
                             setModalFor("edit");
                             event.stopPropagation();
-                            setSelectedFile();
+                            setSelectedFile(null);
                             let editData = {
                                 id: record.id,
                                 position: record.position,
@@ -156,10 +156,6 @@ const Leadership = () => {
         if (!window.localStorage.getItem("token")) {
             navigate("/login");
         }
-
-        if (data?.data.success) {
-            console.log(data.data);
-        }
     }, [data]);
 
     const handleFieldsChange = (_, allFields) => {
@@ -174,20 +170,15 @@ const Leadership = () => {
                 const { position, name, contents, leadershipType } = await values;
 
                 const add = {
-                    position, name, contents, leadershipType
+                    position, name, contents, leadershipType, file: selectedFile,
                 };
-
-                if (selectedFile) {
-                    add.file = selectedFile;
-                }
 
                 try {
                     mutate(add);
-                    if (!errorAdd) {
-                        handleCancel();
-                    }
                 } catch (error) {
                     window.alert(error.data.message);
+                } finally {
+                    handleCancel();
                 }
             })
             .catch((error) => {
@@ -199,16 +190,17 @@ const Leadership = () => {
         await form
             .validateFields()
             .then(async (values) => {
-                const {  position, name, contents, leadershipType } = await values;
-                console.log(values);
+                const { position, name, contents, leadershipType } = await values;
                 const edit = {
                     position, name, contents, leadershipType
                 };
+                
                 if (selectedFile) {
                     edit.file = selectedFile;
                 } else if (modalInfo.fileDto?.fileId) {
                     edit.fileId = modalInfo.fileDto.fileId;
                 }
+                console.log('VALUE:',edit);
 
                 try {
                     mutateEdit({ id, edit });
@@ -240,7 +232,7 @@ const Leadership = () => {
         form.resetFields();
         setModalInfo({});
         setIsModalOpen(false);
-        setSelectedFile();
+        setSelectedFile(null);
         setModalFor("");
     };
 
@@ -290,7 +282,7 @@ const Leadership = () => {
                                 setModalFor("add");
                                 setModalInfo({});
                                 setIsModalOpen(true);
-                                setSelectedFile();
+                                setSelectedFile(null);
                             }}>
                             Add Data
                         </Button>
@@ -324,6 +316,7 @@ const Leadership = () => {
                             <Form.Item
                                 label='Type'
                                 name='leadershipType'
+                                initialValue={'CEO'}
                                 rules={[
                                     {
                                         required: true,
@@ -339,7 +332,6 @@ const Leadership = () => {
                                     }))}
                                     onChange={() => {
                                         setType(form.getFieldValue('leadershipType'));
-                                        
                                       }}
                                     />
                             </Form.Item>
@@ -377,7 +369,7 @@ const Leadership = () => {
                                     },
                                 ]}
                                 style={{ marginTop: "30px" }}>
-                                <TextArea rows={4} />
+                                <TextArea rows={4} placeholder="You can wrap a line by typing \\n" />
                             </Form.Item>
                            
                             <Form.Item
@@ -411,7 +403,7 @@ const Leadership = () => {
                                 <Button
                                     type='primary'
                                     disabled={
-                                        type !== 'HEAD' ? !isFormValid : (!selectedFile && !isFormValid)
+                                        type !== 'HEAD' ? (!selectedFile || !isFormValid) : !isFormValid
                                     }
                                     onClick={(event) => {
                                         event.stopPropagation();
@@ -446,8 +438,7 @@ const Leadership = () => {
                                             label: item,
                                         }))}
                                         onChange={() => {
-                                            setType(form.getFieldValue('leadershipType'));
-                                            
+                                            setType(form.getFieldValue('leadershipType'));  
                                           }}
                                         />
                             </Form.Item>
@@ -485,7 +476,7 @@ const Leadership = () => {
                                     },
                                 ]}
                                 style={{ marginTop: "30px" }}>
-                                <TextArea rows={4} />
+                                <TextArea rows={4} placeholder="You can wrap a line by typing \\n" />
                             </Form.Item>
                             <Form.Item label='Photo'>
                                 <div >
@@ -493,7 +484,9 @@ const Leadership = () => {
                                 <Image src={modalInfo.fileDto?.fileUrl} width={200} />
                                 </div>
                             </Form.Item>
-                            <Form.Item label="New Photo">
+                            <Form.Item 
+                                label="New Photo"
+                            >
                                 <div>
                                     <input
                                         type='file'

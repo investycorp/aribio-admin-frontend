@@ -103,6 +103,7 @@ const Media = () => {
                                 id: record.id,
                                 date: record.date,
                                 title: record.title,
+                                representative: record.representative,
                                 url: record.url,
                                 fileDto: record.fileDto,
                             };
@@ -168,7 +169,7 @@ const Media = () => {
 
                 const add = {
                     title,
-                    representative: representative ? true : false,
+                    representative,
                     url,
                 };
 
@@ -195,7 +196,7 @@ const Media = () => {
             .validateFields()
             .then(async (values) => {
                 const { title, representative, url } = await values;
-                console.log(values);
+                console.log('EDIT', values);
                 const edit = {
                     title,
                     representative,

@@ -25,7 +25,7 @@ const useAddLeadership = () => {
                 queryClient.invalidateQueries("leadershipList");
             },
             onError: (error) => {
-                window.alert("Only one representative video can be set.");
+                window.alert("Only one representative CEO information is allowed.");
             }
         }
     );
