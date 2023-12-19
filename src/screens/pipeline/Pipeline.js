@@ -39,7 +39,7 @@ const Pipeline = () => {
 	const [isFormValid, setIsFormValid] = useState(false);
   const [allIndicationsFilled, setAllIndicationsFilled] = useState(false);
 
-	const [indication, setIndication] = useState([{ indication: "", phase: "IND-enabling" }]);
+	const [indication, setIndication] = useState([{ indication: "", phase: "IND-enabling", state: 0 }]);
 	const [len, setLen] = useState(1);
 	const phaseList = [
 		"IND-enabling",
@@ -98,7 +98,7 @@ const Pipeline = () => {
 						style={{ minWidth: "fit-content" }}
 					>
 						<span style={{ marginRight: "10px" }}>{item.indication}:</span>
-						<span>{phaseList[parseInt(item.phase)]}</span>
+						<span>{phaseList[parseInt(item.phase)]} / State {item.state}</span>
 						<br />
 					</span>
 				)),
@@ -131,6 +131,7 @@ const Pipeline = () => {
 								indication: record.pipelineIndicationDtoList.map((item) => ({
 									indication: item.indication,
 									phase: item.phase,
+									state: item.state,
 								})),
 							};
 							setIndication(editData.indication);
@@ -265,12 +266,14 @@ const Pipeline = () => {
 		setIsModalOpen(false);
 		setSelectedFile();
 		setModalFor("");
-		setIndication([{ indication: "", phase: "" }]);
+		setIndication([{ indication: "", phase: "", state: 0 }]);
 	};
 
 	const handleDynamicChange = (e, index, key) => {
 		let temp = [...indication];
 		if (key === "phase") {
+			temp[index][key] = e;
+		} else if (key === 'state') {
 			temp[index][key] = e;
 		} else {
 			temp[index][key] = e.target.value;
@@ -281,8 +284,10 @@ const Pipeline = () => {
 
 	const handleFieldsChange = (_, allFields) => {
 		const isAllFieldsValid = allFields.every(field => field.errors.length === 0);
-		setIsFormValid(isAllFieldsValid);
-};
+		if (modalFor === 'add') {
+			setIsFormValid(isAllFieldsValid);
+		}
+	};
 
 	useEffect(() => {
 		const filled = indication.every(item => item.indication.trim() !== '');
@@ -466,6 +471,34 @@ const Pipeline = () => {
 												},
 											]}
 										/>
+
+										<FormLabel htmlFor={"state" + index}>State:</FormLabel>
+
+										<Select
+											defaultValue='0'
+											style={{ width: 50 }}
+											onChange={(value) =>
+												handleDynamicChange(value, index, "state")
+											}
+											options={[
+												{
+													value: 0,
+													label: "0",
+												},
+												{
+													value: 1,
+													label: "1",
+												},
+												{
+													value: 2,
+													label: "2",
+												},
+												{
+													value: 3,
+													label: "3",
+												},
+											]}
+										/>
 									</FormRowWrap>
 								))}
 								<FormRowWrap>
@@ -474,7 +507,7 @@ const Pipeline = () => {
 										onClick={() => {
 											setIndication([
 												...indication,
-												{ indication: "", phase: "" },
+												{ indication: "", phase: "", state: 0 },
 											]);
 										}}
 										style={{
@@ -637,6 +670,35 @@ const Pipeline = () => {
 												},
 											]}
 										/>
+
+										<FormLabel htmlFor={"state" + index}>State:</FormLabel>
+
+										<Select
+											value={indication[index].state}
+											style={{ width: 50 }}
+											onChange={(value) => {
+												handleDynamicChange(value, index, "state")
+											}
+											}
+											options={[
+												{
+													value: 0,
+													label: "0",
+												},
+												{
+													value: 1,
+													label: "1",
+												},
+												{
+													value: 2,
+													label: "2",
+												},
+												{
+													value: 3,
+													label: "3",
+												},
+											]}
+										/>
 									</FormRowWrap>
 								))}
 								<FormRowWrap>
@@ -645,7 +707,7 @@ const Pipeline = () => {
 										onClick={() => {
 											setIndication([
 												...indication,
-												{ indication: "", phase: "" },
+												{ indication: "", phase: "", state: 0 },
 											]);
 										}}
 										style={{
@@ -681,7 +743,7 @@ const Pipeline = () => {
 								}}
 							>
 								<Button
-									disabled={!isFormValid || !allIndicationsFilled}
+									disabled={!allIndicationsFilled}
 									type='primary'
 									onClick={(event) => {
 										event.stopPropagation();
