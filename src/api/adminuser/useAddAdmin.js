@@ -16,6 +16,9 @@ const useAddAdmin = () => {
 				queryClient.invalidateQueries("AdminUserList");
 				console.log("success:", data);
 			},
+			onError: () => {
+				window.alert("Duplicate ID found.");
+			}
 		}
 	);
 

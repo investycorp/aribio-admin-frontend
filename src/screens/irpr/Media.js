@@ -331,6 +331,7 @@ const Media = () => {
                                 <Input />
                             </Form.Item>
                             <Form.Item
+                                initialValue={false}
                                 label='Is this Main Video?'
                                 name='representative'
                                 valuePropName="checked"
