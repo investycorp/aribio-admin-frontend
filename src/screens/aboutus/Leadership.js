@@ -330,8 +330,8 @@ const Leadership = () => {
                                         value: item,
                                         label: item,
                                     }))}
-                                    onChange={() => {
-                                        setType(form.getFieldValue('leadershipType'));
+                                    onChange={(value) => {
+                                        setType(value);  
                                       }}
                                     />
                             </Form.Item>
@@ -371,7 +371,6 @@ const Leadership = () => {
                                 style={{ marginTop: "30px" }}>
                                 <TextArea rows={4} placeholder="You can wrap a line by typing \\n" />
                             </Form.Item>
-                           
                             <Form.Item
                                 label={
                                     <>
@@ -437,8 +436,8 @@ const Leadership = () => {
                                             value: item,
                                             label: item,
                                         }))}
-                                        onChange={() => {
-                                            setType(form.getFieldValue('leadershipType'));  
+                                        onChange={(value) => {
+                                            setType(value);  
                                           }}
                                         />
                             </Form.Item>
@@ -522,7 +521,9 @@ const Leadership = () => {
                                     alignItems: "center",
                                 }}>
                                 <Button
-                                    disabled={false}
+                                    disabled={
+                                        type !== 'HEAD' ? (!selectedFile || !isFormValid) : !isFormValid
+                                    }
                                     type='primary'
                                     onClick={(event) => {
                                         event.stopPropagation();
