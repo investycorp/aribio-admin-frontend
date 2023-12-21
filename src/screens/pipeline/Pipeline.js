@@ -507,7 +507,7 @@ const Pipeline = () => {
 										onClick={() => {
 											setIndication([
 												...indication,
-												{ indication: "", phase: "", state: 0 },
+												{ indication: "", phase: 0, state: 0 },
 											]);
 										}}
 										style={{
@@ -707,7 +707,7 @@ const Pipeline = () => {
 										onClick={() => {
 											setIndication([
 												...indication,
-												{ indication: "", phase: "", state: 0 },
+												{ indication: "", phase: 0, state: 0 },
 											]);
 										}}
 										style={{
