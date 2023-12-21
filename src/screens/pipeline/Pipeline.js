@@ -39,7 +39,7 @@ const Pipeline = () => {
 	const [isFormValid, setIsFormValid] = useState(false);
   const [allIndicationsFilled, setAllIndicationsFilled] = useState(false);
 
-	const [indication, setIndication] = useState([{ indication: "", phase: "IND-enabling", state: 0 }]);
+	const [indication, setIndication] = useState([{ indication: "", phase: 0, state: 0 }]);
 	const [len, setLen] = useState(1);
 	const phaseList = [
 		"IND-enabling",

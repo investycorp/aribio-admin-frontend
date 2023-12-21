@@ -109,6 +109,7 @@ const Leadership = () => {
                                 fileDto: record.fileDto,
                             };
                             console.log("editData", editData);
+                            setType(record.leadershipType);
                             await setModalInfo(editData);
                             form.setFieldsValue(editData);
                             setTimeout(() => {
@@ -235,6 +236,8 @@ const Leadership = () => {
         setSelectedFile(null);
         setModalFor("");
     };
+
+    useEffect(() => {console.log(modalInfo?.fileDto?.fileUrl);}, [modalInfo])
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
@@ -421,6 +424,7 @@ const Leadership = () => {
                                 {modalInfo.id}
                             </Form.Item>
                             <Form.Item
+                                initialValue={modalInfo?.leadershipType}
                                 label='Type'
                                 name='leadershipType'
                                 rules={[
@@ -442,6 +446,7 @@ const Leadership = () => {
                                         />
                             </Form.Item>
                             <Form.Item
+                                initialValue={modalInfo?.name}
                                 label='Name'
                                 name='name'
                                 rules={[
@@ -454,6 +459,7 @@ const Leadership = () => {
                                 <Input />
                             </Form.Item>
                             <Form.Item
+                                initialValue={modalInfo?.position}
                                 label='Position'
                                 name='position'
                                 rules={[
@@ -466,6 +472,7 @@ const Leadership = () => {
                                 <Input />
                             </Form.Item>
                             <Form.Item
+                                initialValue={modalInfo?.contents}
                                 label='Contents'
                                 name='contents'
                                 rules={[
@@ -522,7 +529,7 @@ const Leadership = () => {
                                 }}>
                                 <Button
                                     disabled={
-                                        type !== 'HEAD' ? (!selectedFile || !isFormValid) : !isFormValid
+                                        type !== 'HEAD' ? (modalInfo?.fileDto?.fileUrl ? false : !selectedFile) : false
                                     }
                                     type='primary'
                                     onClick={(event) => {
