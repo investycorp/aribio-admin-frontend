@@ -187,6 +187,8 @@ const AdminUser = () => {
                 handleCancel();
                 // window.location.reload();
             }
+        }).catch((error) => {
+            window.alert("Please fill out all the required fields");
         });
     };
 
@@ -202,7 +204,7 @@ const AdminUser = () => {
                     department,
                     jobGrade,
                 } = await values;
-                console.log("values: ", values);
+
                 const edit = await {
                     name: name,
                     userId: modalInfo.userId,

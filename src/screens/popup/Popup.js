@@ -96,7 +96,7 @@ const Popup = () => {
             render: (event, record) => {
                 return (
                     <span>
-                        {record.startDate} {record.startHour}:00:00
+                        {record.startDate} / {record.startHour}:00:00
                     </span>
                 );
             }
@@ -108,7 +108,7 @@ const Popup = () => {
             render: (event, record) => {
                 return (
                     <span>
-                        {record.endDate} {record.endHour}:00:00
+                        {record.endDate} / {record.endHour}:00:00
                     </span>
                 );
             }
@@ -353,21 +353,17 @@ const Popup = () => {
         setSearchValue(value);
         let filteredData = data?.data?.dataList.filter((item) => {
             const lowerCaseValue = value.toLowerCase();
-            return Object.keys(item).some(key => {
-                const val = item[key];
-                if (typeof val === 'string' || typeof val === 'number') {
-                    return val.toString().toLowerCase().includes(lowerCaseValue);
-                }
-    
-                if (typeof val === 'object' && val !== null) {
-                    return Object.keys(val).some(subKey => {
-                        const subVal = val[subKey];
-                        return subVal.toString().toLowerCase().includes(lowerCaseValue);
-                    });
-                }
-    
-                return false;
-            });
+            return (
+                item.type.toLowerCase().includes(lowerCaseValue) ||
+                item.title.toLowerCase().includes(lowerCaseValue) ||
+                item.startDate.toString().includes(lowerCaseValue) ||
+                item.startHour.toString().concat(':00:00').includes(lowerCaseValue) ||
+                item.endDate.toString().includes(lowerCaseValue) ||
+                item.endHour.toString().concat(':00:00').includes(lowerCaseValue) ||
+                item.language.toLowerCase().includes(lowerCaseValue) ||
+                item.link.toLowerCase().includes(lowerCaseValue)
+                
+            );
         });
         setFilteredList(filteredData);
     };
