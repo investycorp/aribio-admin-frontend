@@ -9,16 +9,7 @@ import {
   FormRowWrap,
 } from "../../components/style";
 import Sidebar from "../../components/Sidebar";
-import {
-  Badge,
-  Button,
-  Form,
-  Input,
-  Layout,
-  Modal,
-  Select,
-  Table,
-} from "antd";
+import { Badge, Button, Form, Input, Layout, Modal, Select, Table } from "antd";
 
 import useCareerList from "../../api/career/useCareerList";
 import useJobGroupList from "../../api/career/jobGroup/useJobGroupList";
@@ -36,7 +27,7 @@ const Career = () => {
   const [modalInfo, setModalInfo] = useState({});
   const [modalFor, setModalFor] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
-  const [newJobGroup, setNewJobGroup] = useState('');
+  const [newJobGroup, setNewJobGroup] = useState("");
 
   const { data, isLoading, refetch } = useCareerList();
   const { mutate, isSuccess } = useAddCareer();
@@ -347,8 +338,8 @@ const Career = () => {
               <Form.Item
                 label={
                   <>
-                      <span style={{color: '#ff4d4f', fontSize: 14}}>* </span>
-                      <span>Job Title</span>
+                    <span style={{ color: "#ff4d4f", fontSize: 14 }}>* </span>
+                    <span>Job Title</span>
                   </>
                 }
                 name="jobGroupId"
@@ -359,8 +350,8 @@ const Career = () => {
                     value: item.id,
                     label: item.name,
                   }))}
-                  onChange={id => {
-                    form.setFieldsValue({jobGroupId: id});
+                  onChange={(id) => {
+                    form.setFieldsValue({ jobGroupId: id });
                   }}
                 />
                 <Form.Item label="Add New">
@@ -391,6 +382,7 @@ const Career = () => {
               <Form.Item
                 label="Link"
                 name="url"
+                initialValue={"https://"}
                 rules={[
                   {
                     required: true,
@@ -461,10 +453,10 @@ const Career = () => {
                 <Input width={100} />
               </Form.Item>
               <Form.Item
-                 label={
+                label={
                   <>
-                      <span style={{color: '#ff4d4f', fontSize: 14}}>* </span>
-                      <span>Job Title</span>
+                    <span style={{ color: "#ff4d4f", fontSize: 14 }}>* </span>
+                    <span>Job Title</span>
                   </>
                 }
                 name="jobGroupId"
@@ -483,8 +475,8 @@ const Career = () => {
                     value: item.id,
                     label: item.name,
                   }))}
-                  onChange={id => {
-                    form.setFieldsValue({jobGroupId: id});
+                  onChange={(id) => {
+                    form.setFieldsValue({ jobGroupId: id });
                   }}
                 />
                 <Form.Item label="Add New">
