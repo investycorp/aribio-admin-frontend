@@ -290,7 +290,7 @@ const History = () => {
       }
 
       return Promise.reject(
-        new Error("Please enter a year(YYYY) between categories")
+        new Error("Please enter a year(YYYY) between selected category value")
       );
     },
   };
