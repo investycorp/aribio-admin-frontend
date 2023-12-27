@@ -60,7 +60,6 @@ const History = () => {
       //     </span>
       // ),
     },
-
     {
       title: "Category",
       dataIndex: "historyTypeId",
@@ -72,7 +71,6 @@ const History = () => {
           if (item?.id === id) {
             type = ` ${item?.startYear} ~ ${item?.endYear}`;
           }
-          return { type };
         });
         return type;
       },
@@ -203,7 +201,6 @@ const History = () => {
         };
 
         try {
-          console.log("edit: ", edit);
           mutateEdit({ id, edit });
         } catch (error) {
           console.log(error);
@@ -280,17 +277,18 @@ const History = () => {
 
   const dateRangeRule = {
     validator: (_, value) => {
+      const selectedType = typeData?.data?.dataList.find(
+        (item) => item.id === form.getFieldValue("historyTypeId")
+      );
+
       if (
         value &&
-        value.slice(0, 4) >=
-          typeData?.data?.dataList[form.getFieldValue("historyTypeId") - 1]
-            ?.startYear &&
-        value.slice(0, 4) <=
-          typeData?.data?.dataList[form.getFieldValue("historyTypeId") - 1]
-            ?.endYear
+        value.slice(0, 4) >= selectedType?.startYear &&
+        value.slice(0, 4) <= selectedType?.endYear
       ) {
         return Promise.resolve();
       }
+
       return Promise.reject(
         new Error("Please enter a year(YYYY) between categories")
       );
