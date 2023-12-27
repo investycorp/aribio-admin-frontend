@@ -1,17 +1,18 @@
 import axios from "axios";
 import { useQuery, useQueryClient } from "react-query";
 import Language from "../../../atoms/Language";
-import { useRecoilState } from "recoil";
+import { useRecoilValue } from "recoil";
 import { useLocation } from "react-router-dom";
 
 const useLeadershipList = () => {
   const location = useLocation();
-  const [language, setLanguage] = useRecoilState(Language);
+  const language = useRecoilValue(Language);
   const lan = language === "ENG" ? "ENGLISH" : "KOREAN";
   const queryClient = useQueryClient();
   const { data, refetch } = useQuery(
     "leadershipList",
-    () => axios.get(`/admin/about-us/leadership`, { params: { language: lan } }),
+    () =>
+      axios.get(`/admin/about-us/leadership`, { params: { language: lan } }),
     {
       initialData: queryClient.getQueryData("leadershipList"),
       onError: (error) => {
