@@ -44,6 +44,7 @@ const History = () => {
       title: "Date",
       dataIndex: "date",
       key: "date",
+      width: "10vw",
       sorter: (a, b) => a.date - b.date,
       // filter: [
       // 	{
@@ -64,12 +65,14 @@ const History = () => {
       title: "Category",
       dataIndex: "historyTypeId",
       key: "historyTypeId",
+      width: "10vw",
       render: (id) => {
         let type;
         typeData?.data?.dataList.map((item) => {
           if (item?.id === id) {
             type = ` ${item?.startYear} ~ ${item?.endYear}`;
           }
+          return { type };
         });
         return type;
       },
@@ -78,17 +81,13 @@ const History = () => {
       title: "Contents",
       dataIndex: "contents",
       key: "contents",
-      render: (text) => (
-        <span>
-          {text?.slice(0, 45)}
-          {text?.length > 45 && "..."}
-        </span>
-      ),
+      width: "50vw",
+      render: (text) => <span>{text}</span>,
     },
-
     {
       title: "",
       key: "action",
+      width: "20vw",
       render: (event, record) => (
         <div
           style={{
