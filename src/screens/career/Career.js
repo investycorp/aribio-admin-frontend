@@ -249,6 +249,11 @@ const Career = () => {
     setSelectedFile();
     setModalFor("");
     setNewJobGroup("");
+
+    const fileInput = document.getElementById("file");
+    if (fileInput) {
+      fileInput.value = "";
+    }
   };
 
   const handleFileChange = (event) => {
