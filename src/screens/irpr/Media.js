@@ -44,16 +44,19 @@ const Media = () => {
       title: "Date",
       dataIndex: "date",
       key: "date",
+      width: "10vw",
     },
     {
       title: "title",
       dataIndex: "title",
       key: "title",
+      width: "35vw",
     },
+    { title: "URL", dataIndex: "url", key: "url", width: "35vw" },
     {
       title: "URL Type",
       dataIndex: "url",
-      key: "url",
+      key: "urlType",
       render: (url) =>
         url.includes("youtube") ? (
           <span>
@@ -85,6 +88,7 @@ const Media = () => {
     {
       title: "",
       key: "action",
+      width: "15vw",
       render: (event, record) => (
         <div
           style={{

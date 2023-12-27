@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useRecoilState } from "recoil";
 import { useNavigate } from "react-router-dom";
-import { Container, Wrap } from "../../components/style";
+import { Wrap } from "../../components/style";
 import Sidebar from "../../components/Sidebar";
 import {
-  Alert,
   Badge,
   Button,
-  Checkbox,
   Form,
   Image,
   Input,
@@ -15,7 +13,6 @@ import {
   Modal,
   Select,
   Table,
-  message,
 } from "antd";
 import TextArea from "antd/es/input/TextArea";
 
@@ -72,7 +69,8 @@ const Leadership = () => {
       title: "Contents",
       dataIndex: "contents",
       key: "contents",
-      render: (text) => <span>{text?.split("\\n")[0]}...</span>,
+      width: "50vw",
+      render: (text) => <span>{text}</span>,
     },
 
     {

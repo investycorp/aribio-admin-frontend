@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useRecoilState } from "recoil";
 import { useNavigate } from "react-router-dom";
-import { Container, Wrap } from "../../components/style";
+import { Wrap } from "../../components/style";
 import Sidebar from "../../components/Sidebar";
 import {
   Badge,
@@ -23,7 +22,6 @@ import useDeletePublication from "../../api/publication/useDeletePublication";
 const Publication = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
-  const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalInfo, setModalInfo] = useState({});
   const [modalFor, setModalFor] = useState("");
@@ -39,39 +37,33 @@ const Publication = () => {
     {
       title: "ID",
       dataIndex: "id",
-      key: "idd",
+      key: "id",
     },
     {
       title: "Date",
       dataIndex: "date",
       key: "date",
+      width: "10vw",
     },
     {
       title: "Type",
       dataIndex: "type",
       key: "type",
+      width: "10vw",
     },
     {
       title: "Journal",
       dataIndex: "journal",
       key: "journal",
-      render: (text) => (
-        <span>
-          {text?.slice(0, 10)}
-          {text?.length > 10 && "..."}
-        </span>
-      ),
+      width: "25vw",
+      render: (text) => <span>{text}</span>,
     },
     {
       title: "Title",
       dataIndex: "title",
       key: "title",
-      render: (text) => (
-        <span>
-          {text?.slice(0, 45)}
-          {text?.length > 45 && "..."}
-        </span>
-      ),
+      width: "40vw",
+      render: (text) => <span>{text}</span>,
     },
 
     {
