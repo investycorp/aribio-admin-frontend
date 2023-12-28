@@ -462,6 +462,7 @@ const History = () => {
                     message: "Required field",
                   },
                   dateValidationRule,
+                  dateRangeRule,
                 ]}
               >
                 <Input placeholder="YYYY-MM-DD" style={{ width: 150 }} />
