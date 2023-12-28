@@ -46,20 +46,22 @@ const Career = () => {
       title: "Location",
       dataIndex: "location",
       key: "location",
+      width: "20vw",
     },
     {
       title: "Date",
       dataIndex: "date",
       key: "date",
+      width: "10vw",
     },
     {
       title: "Job title",
       dataIndex: "jobGroupDto",
       key: "jobGroupDto",
+      width: "30vw",
       render: (jobGroupDto) => (
         <span>
-          {jobGroupDto.name.slice(0, 30)}
-          {jobGroupDto.name.length > 30 && "..."}
+          {jobGroupDto.name}
         </span>
       ),
     },
@@ -73,10 +75,10 @@ const Career = () => {
       title: "Link",
       dataIndex: "url",
       key: "url",
+      width: "30vw",
       render: (text) => (
         <span>
-          {text?.slice(0, 30)}
-          {text?.length > 30 && "..."}
+          {text}
         </span>
       ),
     },
