@@ -72,11 +72,14 @@ const Popup = () => {
       title: "Title",
       dataIndex: "title",
       key: "title",
+      width: '20vw',
+      render: (text) => <span style={{wordBreak: 'break-all'}}>{text}</span>
     },
     {
       title: "Exposure Location",
       dataIndex: "location",
       key: "location",
+      width: '7vw',
       render: (event, record) => {
         return (
           <span>
@@ -89,6 +92,7 @@ const Popup = () => {
       title: "Modal Size",
       dataIndex: "size",
       key: "size",
+      width: '7vw',
       render: (event, record) => {
         return (
           <span>
@@ -101,6 +105,7 @@ const Popup = () => {
       title: "Start Date",
       dataIndex: "startDate",
       key: "startDate",
+      width: '8vw',
       render: (event, record) => {
         return (
           <span>
@@ -113,6 +118,7 @@ const Popup = () => {
       title: "End Date",
       dataIndex: "endDate",
       key: "endDate",
+      width: '8vw',
       render: (event, record) => {
         return (
           <span>
@@ -130,6 +136,8 @@ const Popup = () => {
       title: "Link",
       dataIndex: "link",
       key: "link",
+      width: '25vw',
+      render: (text) => <span style={{wordBreak: 'break-all'}}>{text}</span>
     },
     {
       title: "Close Button Status",
