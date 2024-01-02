@@ -53,11 +53,15 @@ const Leadership = () => {
       title: "Name",
       dataIndex: "name",
       key: "name",
+      width: "25vw",
+      render: (text) => <span style={{wordBreak: 'break-all'}}>{text}</span>,
     },
     {
       title: "Position",
       dataIndex: "position",
       key: "position",
+      width: "15vw",
+      render: (text) => <span style={{wordBreak: 'break-all'}}>{text}</span>,
     },
     {
       title: "Photo",
@@ -70,12 +74,13 @@ const Leadership = () => {
       dataIndex: "contents",
       key: "contents",
       width: "50vw",
-      render: (text) => <span>{text}</span>,
+      render: (text) => <span style={{wordBreak: 'break-all'}}>{text}</span>,
     },
 
     {
       title: "",
       key: "action",
+      width: "10vw",
       render: (event, record) => (
         <div
           style={{

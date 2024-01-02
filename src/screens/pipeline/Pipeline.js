@@ -254,7 +254,7 @@ const Pipeline = () => {
     setIsModalOpen(false);
     setSelectedFile();
     setModalFor("");
-    setIndication([{ indication: "", phase: "", state: 0 }]);
+    setIndication([{ indication: "", phase: 0, state: 0 }]);
   };
 
   const handleDynamicChange = (e, index, key) => {
