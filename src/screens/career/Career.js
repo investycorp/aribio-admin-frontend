@@ -35,6 +35,7 @@ const Career = () => {
   const { mutate: mutateDelete } = useDeleteCareer();
   const { data: jobGroupData } = useJobGroupList();
   const { mutate: mutateJobGroup } = useAddJobGroup();
+  const [jobId, setJobId] = useState(undefined);
 
   const listColumns = [
     {
@@ -59,11 +60,7 @@ const Career = () => {
       dataIndex: "jobGroupDto",
       key: "jobGroupDto",
       width: "30vw",
-      render: (jobGroupDto) => (
-        <span>
-          {jobGroupDto.name}
-        </span>
-      ),
+      render: (jobGroupDto) => <span>{jobGroupDto.name}</span>,
     },
     {
       title: "Image",
@@ -76,11 +73,7 @@ const Career = () => {
       dataIndex: "url",
       key: "url",
       width: "30vw",
-      render: (text) => (
-        <span>
-          {text}
-        </span>
-      ),
+      render: (text) => <span>{text}</span>,
     },
 
     {
@@ -110,7 +103,7 @@ const Career = () => {
                 url: record?.url,
                 popupContents: record?.popupContents,
               };
-
+              setJobId(record?.jobGroupDto.id);
               await setModalInfo(editData);
               form.setFieldsValue(editData);
               setTimeout(() => {
@@ -251,6 +244,7 @@ const Career = () => {
     setSelectedFile();
     setModalFor("");
     setNewJobGroup("");
+    setJobId(undefined);
 
     const fileInput = document.getElementById("file");
     if (fileInput) {
@@ -358,6 +352,7 @@ const Career = () => {
                     label: item.name,
                   }))}
                   onChange={(id) => {
+                    setJobId(id);
                     form.setFieldsValue({ jobGroupId: id });
                   }}
                 />
@@ -430,6 +425,7 @@ const Career = () => {
                 }}
               >
                 <Button
+                  disabled={!!!jobId}
                   type="primary"
                   onClick={(event) => {
                     event.stopPropagation();
@@ -483,6 +479,7 @@ const Career = () => {
                     label: item.name,
                   }))}
                   onChange={(id) => {
+                    setJobId(id);
                     form.setFieldsValue({ jobGroupId: id });
                   }}
                 />
@@ -564,7 +561,7 @@ const Career = () => {
                 }}
               >
                 <Button
-                  disabled={false}
+                  disabled={!!!jobId}
                   type="primary"
                   onClick={(event) => {
                     event.stopPropagation();
