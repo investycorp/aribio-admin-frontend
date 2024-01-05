@@ -256,7 +256,7 @@ const Advisor = () => {
       <Modal
         width={800}
         style={{ overflowY: "scroll" }}
-        title={modalFor === "add" ? "Add New Notice" : "Edit Notice"}
+        title={modalFor === "add" ? "Add New Advisor" : "Edit Advisor"}
         open={isModalOpen}
         // confirmLoading={confirmLoading}
         onCancel={handleCancel}
