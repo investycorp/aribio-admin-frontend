@@ -35,6 +35,7 @@ const Career = () => {
   const { mutate: mutateDelete } = useDeleteCareer();
   const { data: jobGroupData } = useJobGroupList();
   const { mutate: mutateJobGroup } = useAddJobGroup();
+  const [jobId, setJobId] = useState(undefined);
 
   const listColumns = [
     {
@@ -46,22 +47,20 @@ const Career = () => {
       title: "Location",
       dataIndex: "location",
       key: "location",
+      width: "20vw",
     },
     {
       title: "Date",
       dataIndex: "date",
       key: "date",
+      width: "10vw",
     },
     {
       title: "Job title",
       dataIndex: "jobGroupDto",
       key: "jobGroupDto",
-      render: (jobGroupDto) => (
-        <span>
-          {jobGroupDto.name.slice(0, 30)}
-          {jobGroupDto.name.length > 30 && "..."}
-        </span>
-      ),
+      width: "30vw",
+      render: (jobGroupDto) => <span>{jobGroupDto.name}</span>,
     },
     {
       title: "Image",
@@ -73,12 +72,8 @@ const Career = () => {
       title: "Link",
       dataIndex: "url",
       key: "url",
-      render: (text) => (
-        <span>
-          {text?.slice(0, 30)}
-          {text?.length > 30 && "..."}
-        </span>
-      ),
+      width: "30vw",
+      render: (text) => <span>{text}</span>,
     },
 
     {
@@ -108,7 +103,7 @@ const Career = () => {
                 url: record?.url,
                 popupContents: record?.popupContents,
               };
-
+              setJobId(record?.jobGroupDto.id);
               await setModalInfo(editData);
               form.setFieldsValue(editData);
               setTimeout(() => {
@@ -249,6 +244,7 @@ const Career = () => {
     setSelectedFile();
     setModalFor("");
     setNewJobGroup("");
+    setJobId(undefined);
 
     const fileInput = document.getElementById("file");
     if (fileInput) {
@@ -356,6 +352,7 @@ const Career = () => {
                     label: item.name,
                   }))}
                   onChange={(id) => {
+                    setJobId(id);
                     form.setFieldsValue({ jobGroupId: id });
                   }}
                 />
@@ -428,6 +425,7 @@ const Career = () => {
                 }}
               >
                 <Button
+                  disabled={!!!jobId}
                   type="primary"
                   onClick={(event) => {
                     event.stopPropagation();
@@ -481,6 +479,7 @@ const Career = () => {
                     label: item.name,
                   }))}
                   onChange={(id) => {
+                    setJobId(id);
                     form.setFieldsValue({ jobGroupId: id });
                   }}
                 />
@@ -562,7 +561,7 @@ const Career = () => {
                 }}
               >
                 <Button
-                  disabled={false}
+                  disabled={!!!jobId}
                   type="primary"
                   onClick={(event) => {
                     event.stopPropagation();

@@ -25,9 +25,8 @@ const Pipeline = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isFormValid, setIsFormValid] = useState(false);
   const [allIndicationsFilled, setAllIndicationsFilled] = useState(false);
-
   const [indication, setIndication] = useState([
-    { indication: "", phase: 0, state: 0 },
+    { indication: "", phase: "0", state: 0 },
   ]);
   const [len, setLen] = useState(1);
   const phaseList = [
@@ -200,7 +199,6 @@ const Pipeline = () => {
         } finally {
           // await refetch();
           handleCancel();
-          // window.location.reload();
         }
       })
       .catch((error) => {
@@ -229,6 +227,7 @@ const Pipeline = () => {
           console.log(error);
         } finally {
           handleCancel();
+          setIndication([{ indication: "", phase: "0", state: 0 }]);
         }
       })
       .catch((error) => {
@@ -254,7 +253,7 @@ const Pipeline = () => {
     setIsModalOpen(false);
     setSelectedFile();
     setModalFor("");
-    setIndication([{ indication: "", phase: "", state: 0 }]);
+    setIndication([{ indication: "", phase: "0", state: 0 }]);
   };
 
   const handleDynamicChange = (e, index, key) => {
@@ -414,15 +413,7 @@ const Pipeline = () => {
               >
                 <TextArea rows={4} />
               </Form.Item>
-              <Form.Item
-                label="Indication/Phase"
-                rules={[
-                  {
-                    required: true,
-                    message: "Required field",
-                  },
-                ]}
-              ></Form.Item>
+              <Form.Item label="Indication/Phase"></Form.Item>
               <div>
                 {indication?.map((item, index) => (
                   <FormRowWrap key={"indication input" + index}>
@@ -443,9 +434,8 @@ const Pipeline = () => {
                       }}
                     />
                     <FormLabel htmlFor={"phase" + index}>Phase:</FormLabel>
-
                     <Select
-                      defaultValue="0"
+                      value={indication[index].phase.toString()}
                       style={{ width: 300 }}
                       onChange={(value) =>
                         handleDynamicChange(value, index, "phase")
@@ -477,7 +467,7 @@ const Pipeline = () => {
                     <FormLabel htmlFor={"state" + index}>State:</FormLabel>
 
                     <Select
-                      defaultValue="0"
+                      value={indication[index].state}
                       style={{ width: 50 }}
                       onChange={(value) =>
                         handleDynamicChange(value, index, "state")
@@ -509,7 +499,7 @@ const Pipeline = () => {
                     onClick={() => {
                       setIndication([
                         ...indication,
-                        { indication: "", phase: 0, state: 0 },
+                        { indication: "", phase: "0", state: 0 },
                       ]);
                     }}
                     style={{
@@ -547,7 +537,11 @@ const Pipeline = () => {
               >
                 <Button
                   type="primary"
-                  disabled={!isFormValid || !allIndicationsFilled}
+                  disabled={
+                    !isFormValid ||
+                    !allIndicationsFilled ||
+                    indication.length === 0
+                  }
                   onClick={(event) => {
                     event.stopPropagation();
 
@@ -653,7 +647,6 @@ const Pipeline = () => {
                       }}
                     />
                     <FormLabel htmlFor={"phase" + index}>Phase:</FormLabel>
-
                     <Select
                       value={indication[index].phase.toString()}
                       style={{ width: 300 }}
@@ -719,7 +712,7 @@ const Pipeline = () => {
                     onClick={() => {
                       setIndication([
                         ...indication,
-                        { indication: "", phase: 0, state: 0 },
+                        { indication: "", phase: "0", state: 0 },
                       ]);
                     }}
                     style={{
@@ -755,7 +748,7 @@ const Pipeline = () => {
                 }}
               >
                 <Button
-                  disabled={!allIndicationsFilled}
+                  disabled={!allIndicationsFilled || indication.length === 0}
                   type="primary"
                   onClick={(event) => {
                     event.stopPropagation();

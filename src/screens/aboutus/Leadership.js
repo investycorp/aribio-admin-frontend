@@ -53,11 +53,15 @@ const Leadership = () => {
       title: "Name",
       dataIndex: "name",
       key: "name",
+      width: "25vw",
+      render: (text) => <span style={{ wordBreak: "break-all" }}>{text}</span>,
     },
     {
       title: "Position",
       dataIndex: "position",
       key: "position",
+      width: "15vw",
+      render: (text) => <span style={{ wordBreak: "break-all" }}>{text}</span>,
     },
     {
       title: "Photo",
@@ -70,12 +74,13 @@ const Leadership = () => {
       dataIndex: "contents",
       key: "contents",
       width: "50vw",
-      render: (text) => <span>{text}</span>,
+      render: (text) => <span style={{ wordBreak: "break-all" }}>{text}</span>,
     },
 
     {
       title: "",
       key: "action",
+      width: "10vw",
       render: (event, record) => (
         <div
           style={{
@@ -203,7 +208,6 @@ const Leadership = () => {
         } else if (modalInfo.fileDto?.fileId) {
           edit.fileId = modalInfo.fileDto.fileId;
         }
-        console.log("VALUE:", edit);
 
         try {
           mutateEdit({ id, edit });
@@ -439,7 +443,6 @@ const Leadership = () => {
                 {modalInfo.id}
               </Form.Item>
               <Form.Item
-                initialValue={modalInfo?.leadershipType}
                 label="Type"
                 name="leadershipType"
                 rules={[
@@ -462,7 +465,6 @@ const Leadership = () => {
                 />
               </Form.Item>
               <Form.Item
-                initialValue={modalInfo?.name}
                 label="Name"
                 name="name"
                 rules={[
@@ -476,7 +478,6 @@ const Leadership = () => {
                 <Input />
               </Form.Item>
               <Form.Item
-                initialValue={modalInfo?.position}
                 label="Position"
                 name="position"
                 rules={[
@@ -490,7 +491,6 @@ const Leadership = () => {
                 <Input />
               </Form.Item>
               <Form.Item
-                initialValue={modalInfo?.contents}
                 label="Contents"
                 name="contents"
                 rules={[

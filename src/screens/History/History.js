@@ -290,7 +290,7 @@ const History = () => {
       }
 
       return Promise.reject(
-        new Error("Please enter a year(YYYY) between categories")
+        new Error("Please enter a year(YYYY) between selected category value")
       );
     },
   };
@@ -462,6 +462,7 @@ const History = () => {
                     message: "Required field",
                   },
                   dateValidationRule,
+                  dateRangeRule,
                 ]}
               >
                 <Input placeholder="YYYY-MM-DD" style={{ width: 150 }} />
