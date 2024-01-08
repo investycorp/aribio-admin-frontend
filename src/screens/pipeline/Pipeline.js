@@ -467,7 +467,7 @@ const Pipeline = () => {
                     <FormLabel htmlFor={"state" + index}>State:</FormLabel>
 
                     <Select
-                      value={indication[index].phase.toString()}
+                      value={indication[index].state}
                       style={{ width: 50 }}
                       onChange={(value) =>
                         handleDynamicChange(value, index, "state")
