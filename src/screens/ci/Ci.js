@@ -50,12 +50,8 @@ const Ci = () => {
       title: "File URL",
       dataIndex: "fileUrl",
       key: "fileUrl",
-      render: (text) => (
-        <span>
-          {text?.slice(0, 45)}
-          {text?.length > 45 && "..."}
-        </span>
-      ),
+      width: "55vw",
+      render: (text) => <span style={{ wordBreak: "break-all" }}>{text}</span>,
     },
     {
       title: "",
@@ -174,24 +170,24 @@ const Ci = () => {
 
   const handlePngFileChange = (event) => {
     const file = event.target.files[0];
-      if (file) {
-          const allowedExtensions = /(\.png)$/i;
-          if (!allowedExtensions.exec(file.name)) {
-            alert('Invalid file type. Only PNG files are allowed.');
-            event.target.value = '';
-            return;
-          }
-          setPngFile(event.target.files[0]);
-        }
+    if (file) {
+      const allowedExtensions = /(\.png)$/i;
+      if (!allowedExtensions.exec(file.name)) {
+        alert("Invalid file type. Only PNG files are allowed.");
+        event.target.value = "";
+        return;
+      }
+      setPngFile(event.target.files[0]);
+    }
   };
-  
+
   const handleAiFileChange = (event) => {
     const file = event.target.files[0];
     if (file) {
       const allowedExtensions = /(\.ai)$/i;
       if (!allowedExtensions.exec(file.name)) {
-        alert('Invalid file type. Only AI files are allowed.');
-        event.target.value = '';
+        alert("Invalid file type. Only AI files are allowed.");
+        event.target.value = "";
         return;
       }
       setAiFile(event.target.files[0]);

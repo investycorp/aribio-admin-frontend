@@ -26,7 +26,7 @@ const queryClient = new QueryClient();
 function App() {
   const [initialized, setInitialized] = useState(false);
   const initialize = async () => {
-    axios.defaults.baseURL = "https://api.aribio.boundary.team/";
+    axios.defaults.baseURL = process.env.REACT_APP_BASE_URL;
     axios.interceptors.request.use(
       async (config) => {
         const token = window.localStorage.getItem("token");

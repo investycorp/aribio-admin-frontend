@@ -1,10 +1,10 @@
 import axios from "axios";
 import { useQuery, useQueryClient } from "react-query";
 import Language from "../../atoms/Language";
-import { useRecoilState } from "recoil";
+import { useRecoilValue } from "recoil";
 
 const useHistoryTypeList = () => {
-  const [language, setLanguage] = useRecoilState(Language);
+  const language = useRecoilValue(Language);
   const lan = language === "ENG" ? "ENGLISH" : "KOREAN";
   const queryClient = useQueryClient();
   const { data, refetch } = useQuery(

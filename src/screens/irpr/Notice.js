@@ -57,8 +57,10 @@ const Notice = () => {
 			title: "Title",
 			dataIndex: "title",
 			key: "title",
-			render: (title) =>
-				title && title.length > 40 ? title.slice(0, 40) + "..." : title,
+			width: '65vw',
+			render: (title) => <span style={{wordBreak: 'break-all'}}>
+				{title}
+			</span>,
 		},
 		{
 			title: "Image",
@@ -219,6 +221,11 @@ const Notice = () => {
 		setSelectedFile();
 		setModalFor("");
 		setIndication([{ indication: "", phase: "" }]);
+
+		const fileInput = document.getElementById("file");
+    if (fileInput) {
+      fileInput.value = "";
+    }
 	};
 
 	const handleFileChange = (event) => {
